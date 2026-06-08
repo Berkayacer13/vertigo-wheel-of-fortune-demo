@@ -1,0 +1,21 @@
+{
+    "name": "Wof.Editor",
+    "rootNamespace": "Wof.EditorTools",
+    "references": [
+        "Wof.Domain",
+        "Wof.Data",
+        "Wof.Application",
+        "Wof.Presentation"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

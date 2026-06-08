@@ -1,0 +1,17 @@
+{
+    "name": "Wof.Application",
+    "rootNamespace": "Wof.Application",
+    "references": [
+        "Wof.Domain",
+        "Wof.Data"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
