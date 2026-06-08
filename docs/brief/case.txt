@@ -1,0 +1,159 @@
+VERTIGO GAMES
+GAME DEVELOPER DEMO
+It is recommended to play “Card game” in Critical Strike to understand instructions clearly.
+You will use the provided UI assets for visual implementation of the game. UI that doesn’t follow rules will not be
+accepted. You are going to develop a wheel of fortune game.
+Here’s how it works:
+●
+
+Instead of selecting cards the player will spin the wheel.
+
+●
+
+Content of slices of each wheel should also be changeable from the editor
+
+●
+
+At every zone, the player spins the wheel that includes multiple rewards and the bomb.
+
+●
+
+One of the slices is a bomb that will take all the rewards that you’ve collected until that point while other slices
+are rew.cards that get better every zone
+
+●
+
+Every 5th zone is a safe zone: risk-free silver spin without a bomb.
+
+●
+
+Every 30th zone is a super zone: risk-free golden spin with special rewards and without the bomb.
+
+●
+
+Player can choose to leave when wheel is not spinning and when the zone is safe or at the super zone
+
+●
+
+When a player hits a bomb, all the rewards will be lost and the game can be restarted. You can implement
+continue system with currency but this feature is just a bonus for demo
+
+In other words, it’s a game of gambling. If the player chooses to spin the wheel, there is a chance to increase the
+reward that they will receive and a chance to lose it all. Before spinning the wheel, the player has a chance to walk
+away and collect all the rewards they received until that point.
+
+What you will send:
+●
+
+Video of the game working
+
+●
+
+Screenshots of the game with 20:9, 16:9 and 4:3 aspect ratio
+
+●
+
+Github project with APK updated as Release
+
+Conditions that your project will be reviewed on:
+●
+
+Must watch and learn list
+○
+
+Türkçe Unity 3D Dersi 1 - Unity Başlangıç
+
+○
+
+How to make a menu in Unity - UI Tutorial
+
+○
+
+https://refactoring.guru/refactoring
+
+○
+
+https://refactoring.guru/design-patterns
+
+●
+
+Proper working .apk uploaded GitHub as “release” file according to the above instructions
+
+●
+
+Reusable, maintainable, scalable and easy testable codebase
+
+●
+
+SOLID Using OOP principles and concepts
+
+●
+
+Visually acceptable, Lean and reusable Unity UI hierarchy compatible with different aspects: 20:9, 16:9, 4:3
+
+●
+
+UI Technical Details
+○
+
+Canvas mode Expand
+
+○
+
+Use TextMeshPro
+
+○
+
+For changeable UI elements, names should end with “_value”
+
+○
+
+Namings should be from root general to specific like: “ui_image_spin_silver”
+
+○
+
+No “RaycastTarget - Maskable” Enabled for unnecessary Image components
+
+○
+
+UI animators should not be in root transform but in separated transforms
+
+○
+
+Anchors and pivot should be correct to avoid issues for other aspect
+
+○
+
+Button references should be automatically set from OnValidate Editor codes
+
+○
+
+Use Sliced Sprites in Image components
+
+○
+
+Do not use unity OnClick or event references from Editor
+
+○
+
+Do not stretch images
+
+Pluses:
+●
+
+Proper usage of Scriptable objects, Dotween, Sprite Atlas
+
+●
+
+Use Unity 2021 LTS
+
+●
+
+Send the .apk build and github link of the project
+
+The deadline is 7 days. As we do not have military rules, if there is any unexpected situation, please inform us for
+extra time.
+
+Example Visual Quality:
+
+
