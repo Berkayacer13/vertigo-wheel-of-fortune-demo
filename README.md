@@ -50,8 +50,8 @@ Assets/_Project/
     Application/  Wof.Application — Events, Services, GameContext, States
     Presentation/ Wof.Presentation — Views, GameController, helpers
     Editor/       Wof.Editor — custom inspectors
+  Tests/          Wof.Tests — edit-mode unit tests
   Prefabs/  Scenes/  Settings/
-Tests/            Wof.Tests — edit-mode unit tests
 ```
 
 ## Getting started
@@ -70,3 +70,19 @@ Tests/            Wof.Tests — edit-mode unit tests
 
 Built commit-by-commit, bottom-up (Domain → Data → Application → Presentation).
 See the git log for the feature-by-feature progression.
+
+**Code-complete (no editor needed):**
+- Domain rules + edit-mode unit tests (zones, weighted selection, wallet, scaling)
+- Data ScriptableObject definitions
+- Application: event bus, services, `GameContext`, full state machine
+- Presentation: all views + `GameController`, editor tooling
+
+**Remaining (requires the Unity editor):**
+1. Open in Unity 2021.3 LTS, import DOTween + TMP essentials.
+2. Build the `Boot`/`Game` scenes and the UI prefabs following the hierarchy and
+   naming rules in [docs/ROADMAP.md §8](docs/ROADMAP.md); `OnValidate` auto-wires the
+   child references.
+3. Create the SO asset instances (`reward_*`, `wheel_bronze/silver/golden`,
+   `zone_tuning`, `game_settings`, `sprite_registry`) and fill the slice tables.
+4. Build the Sprite Atlas from `Assets/_Project/Art`.
+5. Multi-aspect QA (20:9 / 16:9 / 4:3), record video + screenshots, build the APK.
