@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Wof.Domain;
 
 namespace Wof.Application
@@ -16,6 +17,7 @@ namespace Wof.Application
         public event Action<int> SpinLandedOnIndex;
         public event Action<Reward> RewardWon;
         public event Action BombExploded;
+        public event Action<IReadOnlyList<Reward>> RewardsBanked;   // cash-out: the collected list
         public event Action<int> WalletChanged;             // run reward count
         public event Action<int, int> CurrencyChanged;      // gold, cash
         public event Action<GamePhase> PhaseChanged;
@@ -26,6 +28,7 @@ namespace Wof.Application
         public void RaiseSpinLanded(int index) => SpinLandedOnIndex?.Invoke(index);
         public void RaiseRewardWon(Reward reward) => RewardWon?.Invoke(reward);
         public void RaiseBombExploded() => BombExploded?.Invoke();
+        public void RaiseRewardsBanked(IReadOnlyList<Reward> banked) => RewardsBanked?.Invoke(banked);
         public void RaiseWalletChanged(int runCount) => WalletChanged?.Invoke(runCount);
         public void RaiseCurrencyChanged(int gold, int cash) => CurrencyChanged?.Invoke(gold, cash);
         public void RaisePhaseChanged(GamePhase phase) => PhaseChanged?.Invoke(phase);
