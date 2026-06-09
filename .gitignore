@@ -47,6 +47,9 @@ sysinfo.txt
 *.unitypackage
 *.app
 
+# Internal planning/guide docs — kept locally, not tracked in the repo
+/docs/**/*.md
+
 # OS / misc
 .DS_Store
 .DS_Store?

@@ -35,8 +35,6 @@ Domain from referencing UI — the architecture can't rot.
 | Editor | `Wof.Editor` | all (Editor-only) |
 | Tests | `Wof.Tests` | Domain, Data |
 
-See [docs/ROADMAP.md](docs/ROADMAP.md) (what/why + UI-asset mapping) and
-[docs/IMPLEMENTATION_CSHARP.md](docs/IMPLEMENTATION_CSHARP.md) (the code-first guide).
 The original brief lives in [docs/brief/](docs/brief/).
 
 ## Project layout
@@ -79,9 +77,8 @@ See the git log for the feature-by-feature progression.
 
 **Remaining (requires the Unity editor):**
 1. Open in Unity 2021.3 LTS, import DOTween + TMP essentials.
-2. Build the `Boot`/`Game` scenes and the UI prefabs following the hierarchy and
-   naming rules in [docs/ROADMAP.md §8](docs/ROADMAP.md); `OnValidate` auto-wires the
-   child references.
+2. Build the `Boot`/`Game` scenes and the UI prefabs following the screen hierarchy and
+   naming rules; `OnValidate` auto-wires the child references.
 3. Create the SO asset instances (`reward_*`, `wheel_bronze/silver/golden`,
    `zone_tuning`, `game_settings`, `sprite_registry`) and fill the slice tables.
 4. Build the Sprite Atlas from `Assets/_Project/Art`.
