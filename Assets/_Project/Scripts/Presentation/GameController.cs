@@ -117,18 +117,19 @@ namespace Wof.Presentation
 
         private void BindViewInputs()
         {
-            wheelView.BindInput(onSpin: () => Input<ISpinInput>(s => s.OnSpin()),
-                                onLeave: () => Input<ISpinInput>(s => s.OnLeave()));
-            rewardPopup.BindCollect(() => Input<ICollectInput>(s => s.OnCollect()));
+            wheelView.BindInput(onSpin: () => Forward<ISpinInput>(s => s.OnSpin()),
+                                onLeave: () => Forward<ISpinInput>(s => s.OnLeave()));
+            rewardPopup.BindCollect(() => Forward<ICollectInput>(s => s.OnCollect()));
             bombScreen.BindInput(
-                onReviveGold: () => Input<IReviveInput>(s => s.OnReviveGold()),
-                onReviveAd: () => Input<IReviveInput>(s => s.OnReviveAd()),
-                onGiveUp: () => Input<IReviveInput>(s => s.OnGiveUp()));
-            cashOutScreen.BindConfirm(() => Input<ICashOutInput>(s => s.OnConfirm()));
-            gameOverScreen.BindRestart(() => Input<IRestartInput>(s => s.OnRestart()));
+                onReviveGold: () => Forward<IReviveInput>(s => s.OnReviveGold()),
+                onReviveAd: () => Forward<IReviveInput>(s => s.OnReviveAd()),
+                onGiveUp: () => Forward<IReviveInput>(s => s.OnGiveUp()));
+            cashOutScreen.BindConfirm(() => Forward<ICashOutInput>(s => s.OnConfirm()));
+            gameOverScreen.BindRestart(() => Forward<IRestartInput>(s => s.OnRestart()));
         }
 
-        private void Input<T>(System.Action<T> action) where T : class
+        /// <summary>Routes a player input to the active state only if it accepts that input.</summary>
+        private void Forward<T>(System.Action<T> action) where T : class
         {
             if (_fsm.Current is T input) action(input);
         }
