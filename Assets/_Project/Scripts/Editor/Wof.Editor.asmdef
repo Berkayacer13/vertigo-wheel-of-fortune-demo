@@ -5,7 +5,9 @@
         "Wof.Domain",
         "Wof.Data",
         "Wof.Application",
-        "Wof.Presentation"
+        "Wof.Presentation",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [
         "Editor"
