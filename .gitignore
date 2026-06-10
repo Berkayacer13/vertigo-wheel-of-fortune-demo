@@ -60,3 +60,6 @@ Thumbs.db
 
 # DOTween generated settings (regenerated per machine on import)
 /[Aa]ssets/[Rr]esources/DOTweenSettings.asset*
+
+# Stray Unity 6 project accidentally created inside the repo (not part of the demo)
+/Vertigo Demo/
