@@ -446,17 +446,19 @@ namespace Wof.EditorTools
             title.color = new Color(1f, 0.78f, 0.18f);
             title.fontStyle = FontStyles.Bold;
 
-            var bronze = AddImage("ui_image_spin_bronze", wheelRoot, LoadIcon("ui_spin_bronze_base"), Color.white, false);
-            var silver = AddImage("ui_image_spin_silver", wheelRoot, LoadIcon("ui_spin_silver_base"), Color.white, false);
-            var golden = AddImage("ui_image_spin_golden", wheelRoot, LoadIcon("ui_spin_golden_base"), Color.white, false);
-            foreach (var img in new[] { bronze, silver, golden })
-            {
-                Place(img.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 60), new Vector2(900, 900));
-                img.preserveAspect = true;
-            }
-
             var rotor = NewRect("ui_image_spin_rotor", wheelRoot);
             Place(rotor, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 60), new Vector2(900, 900));
+
+            // cylinder bases live INSIDE the rotor so the chambers spin with the icons
+            // (only the top indicator stays static, like a real revolver)
+            var bronze = AddImage("ui_image_spin_bronze", rotor, LoadIcon("ui_spin_bronze_base"), Color.white, false);
+            var silver = AddImage("ui_image_spin_silver", rotor, LoadIcon("ui_spin_silver_base"), Color.white, false);
+            var golden = AddImage("ui_image_spin_golden", rotor, LoadIcon("ui_spin_golden_base"), Color.white, false);
+            foreach (var img in new[] { bronze, silver, golden })
+            {
+                Place(img.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(900, 900));
+                img.preserveAspect = true;
+            }
 
             var sliceViews = new SliceView[8];
             for (int i = 0; i < 8; i++)
