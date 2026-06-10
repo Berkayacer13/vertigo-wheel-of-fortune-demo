@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a40c79b8ade07404ba8a953257b417b3, type: 3}
+  m_Name: reward_points_rifle
+  m_EditorClassIdentifier: 
+  id: reward_points_rifle
+  kind: 5
+  displayName: Rifle Points
+  icon: {fileID: 21300000, guid: f07643c796ee34154a038b713b6a9c44, type: 3}
+  baseAmount: 150
+  rarity: 1
+  winVfx: 1

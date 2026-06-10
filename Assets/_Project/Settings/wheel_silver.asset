@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46d47e91b01634a178a9b8cb6c55618c, type: 3}
+  m_Name: wheel_silver
+  m_EditorClassIdentifier: 
+  tier: 1
+  sliceCount: 8
+  slices:
+  - reward: {fileID: 11400000, guid: ba78d17eb205d4e9fb4d0dc2241c8515, type: 2}
+    weight: 2
+    isBomb: 0
+  - reward: {fileID: 11400000, guid: 00b793200f4cc437ebed364651e941a6, type: 2}
+    weight: 2
+    isBomb: 0
+  - reward: {fileID: 11400000, guid: 99e99264f701a42319763b78f8dd517a, type: 2}
+    weight: 1
+    isBomb: 0
+  - reward: {fileID: 11400000, guid: f777f50f7573f489fa98182740e68471, type: 2}
+    weight: 1.5
+    isBomb: 0
+  - reward: {fileID: 11400000, guid: cd0b6348e273640ae9b4ed5cb12900b7, type: 2}
+    weight: 1.5
+    isBomb: 0
+  - reward: {fileID: 11400000, guid: 356cf4686aa614cc1ac6bb11d77e14bf, type: 2}
+    weight: 1.5
+    isBomb: 0
+  - reward: {fileID: 11400000, guid: ed5b7e26a7d814187b9de8d7744c7725, type: 2}
+    weight: 1
+    isBomb: 0
+  - reward: {fileID: 11400000, guid: 5dd75cb7d48eb47dc8a08d4afa552a60, type: 2}
+    weight: 0.5
+    isBomb: 0

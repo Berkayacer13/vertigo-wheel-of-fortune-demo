@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6e46216fcac394daf809873a058aacc2, type: 3}
+  m_Name: sprite_registry
+  m_EditorClassIdentifier: 
+  entries:
+  - key: UI_icon_gold
+    sprite: {fileID: 21300000, guid: 2b7143215568a411b86935d14b9142de, type: 3}
+  - key: UI_icon_cash
+    sprite: {fileID: 21300000, guid: 1a4ae489f23e047f4af2864205a53d74, type: 3}
+  - key: ui_icon_render_cons_grenade_m26
+    sprite: {fileID: 21300000, guid: d4f1db23280b24f82b6e9e35b733e67b, type: 3}
+  - key: ui_icon_render_cons_healthshot_2_regenerator
+    sprite: {fileID: 21300000, guid: dec9ff922420148b692e58c77917b6f6, type: 3}
+  - key: UI_Icons_Pistol_Points
+    sprite: {fileID: 21300000, guid: dd319509d15de405ea09d0ff93982dee, type: 3}
+  - key: UI_icon_chest_small_noligt
+    sprite: {fileID: 21300000, guid: cc2b750cd5b9f4a74aa3ae62f9098d57, type: 3}
+  - key: UI_Icon_Renders_tier1_shotgun
+    sprite: {fileID: 21300000, guid: 56bbf7894e50945069ebfaf99c88b65b, type: 3}
+  - key: UI_icon_chest_silver_nolight
+    sprite: {fileID: 21300000, guid: 868e361ab91444d32a1dd506d19434bc, type: 3}
+  - key: ui_icon_render_cons_grenade_m67
+    sprite: {fileID: 21300000, guid: 0eec904f4e72e41a48beb7f41a697a1b, type: 3}
+  - key: ui_icon_render_cons_healthshot_2_neurostim
+    sprite: {fileID: 21300000, guid: 582451a6045ad43c28f02e45850e00ee, type: 3}
+  - key: UI_Icons_Rifle_Points
+    sprite: {fileID: 21300000, guid: f07643c796ee34154a038b713b6a9c44, type: 3}
+  - key: UI_Icon_Renders_tier2_rifle
+    sprite: {fileID: 21300000, guid: 3dfbf37f1bd044b90a2913d7e189facb, type: 3}
+  - key: UI_icon_chest_standart_nolight
+    sprite: {fileID: 21300000, guid: a018454f6a58744a8a7478394a92ddf4, type: 3}
+  - key: UI_icon_chest_gold_nolight
+    sprite: {fileID: 21300000, guid: 448dd5421f822495087e6bfe9c41771a, type: 3}
+  - key: UI_icon_chest_super_nolight
+    sprite: {fileID: 21300000, guid: bbcd69f2682634b29b39fe4e50614255, type: 3}
+  - key: UI_Icon_Renders_tier3_sniper
+    sprite: {fileID: 21300000, guid: b7178e67b145c4df9b2a0895bdfa590b, type: 3}
+  - key: UI_Icon_Renders_tier3_smg
+    sprite: {fileID: 21300000, guid: da471e1b3909243f48018f5ad07ee935, type: 3}
+  - key: UI_Icon_Renders_tier3_shotgun
+    sprite: {fileID: 21300000, guid: a67af203f5ce941eda756d6dcce9944d, type: 3}
+  - key: ui_icon_mle_bayonet_summer_vice
+    sprite: {fileID: 21300000, guid: 7e5789324db3244ca8fb714ccc807f40, type: 3}
+  - key: ui_card_icon_death
+    sprite: {fileID: 21300000, guid: f149b51f0b4fa43c9b4b594141e5db59, type: 3}
