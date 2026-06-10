@@ -38,7 +38,7 @@ namespace Wof.EditorTools
             // resumes the capture after the play-mode domain reload
             EditorApplication.delayCall += () =>
             {
-                if (!SessionState.GetBool(PendingKey, false) || !Application.isPlaying) return;
+                if (!SessionState.GetBool(PendingKey, false) || !UnityEngine.Application.isPlaying) return;
                 SessionState.SetBool(PendingKey, false);
                 StartLoop();
             };
@@ -54,12 +54,16 @@ namespace Wof.EditorTools
             if (EditorApplication.isPlaying)
             {
                 StartLoop();
+                return;
             }
-            else
-            {
-                SessionState.SetBool(PendingKey, true);
-                EditorApplication.isPlaying = true; // -> domain reload -> static ctor resumes
-            }
+
+            // make sure we're capturing the actual game, not whatever scene was open
+            const string scenePath = "Assets/_Project/Scenes/Game.unity";
+            if (UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene().path != scenePath)
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(scenePath);
+
+            SessionState.SetBool(PendingKey, true);
+            EditorApplication.isPlaying = true; // -> domain reload -> static ctor resumes
         }
 
         private static void StartLoop()

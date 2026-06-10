@@ -416,14 +416,16 @@ namespace Wof.EditorTools
             goldIcon.preserveAspect = true;
 
             var goldText = AddText("ui_text_currency_gold_value", hud, "0", 40, TextAlignmentOptions.MidlineLeft);
-            Place(goldText.rectTransform, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(120, 0), new Vector2(170, 64));
+            goldText.rectTransform.pivot = new Vector2(0, 0.5f); // rect starts AT x, not centered on it
+            Place(goldText.rectTransform, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(85, 0), new Vector2(170, 64));
 
             var cashIcon = AddImage("ui_image_hud_cash", hud, LoadIcon("UI_icon_cash"), Color.white, false);
             Place(cashIcon.rectTransform, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(300, 0), new Vector2(64, 64));
             cashIcon.preserveAspect = true;
 
             var cashText = AddText("ui_text_currency_cash_value", hud, "0", 40, TextAlignmentOptions.MidlineLeft);
-            Place(cashText.rectTransform, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(380, 0), new Vector2(170, 64));
+            cashText.rectTransform.pivot = new Vector2(0, 0.5f);
+            Place(cashText.rectTransform, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(345, 0), new Vector2(170, 64));
 
             var zoneText = AddText("ui_text_zone_value", hud, "ZONE 1", 44, TextAlignmentOptions.Center);
             Place(zoneText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(120, 0), new Vector2(300, 70));
@@ -440,7 +442,7 @@ namespace Wof.EditorTools
             Place(wheelRoot, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1000, 1300));
 
             var title = AddText("ui_text_wheel_title_value", wheelRoot, "SPIN", 64, TextAlignmentOptions.Center);
-            Place(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 580), new Vector2(800, 90));
+            Place(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 625), new Vector2(800, 90));
             title.color = new Color(1f, 0.78f, 0.18f);
             title.fontStyle = FontStyles.Bold;
 
