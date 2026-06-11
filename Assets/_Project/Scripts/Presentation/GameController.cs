@@ -22,6 +22,7 @@ namespace Wof.Presentation
         [SerializeField] private BombExplodedView bombScreen;
         [SerializeField] private CashOutView cashOutScreen;
         [SerializeField] private GameOverView gameOverScreen;
+        [SerializeField] private InventoryView inventoryView;
 
         private GameContext _ctx;
         private GameStateMachine _fsm;
@@ -50,11 +51,11 @@ namespace Wof.Presentation
             var e = _ctx.Events;
             e.WheelBuilt += wheelView.Render;
             e.ZoneChanged += OnZoneChanged;
-            e.RewardWon += rewardPopup.Show;
+            e.RewardWon += OnRewardWon;
             e.BombExploded += OnBombExploded;
             e.RewardsBanked += cashOutScreen.Show;
             e.CurrencyChanged += hudView.SetCurrency;
-            e.WalletChanged += hudView.SetRunCount;
+            e.WalletChanged += OnWalletChanged;
             e.PhaseChanged += OnPhaseChanged;
         }
 
@@ -64,12 +65,24 @@ namespace Wof.Presentation
             var e = _ctx.Events;
             e.WheelBuilt -= wheelView.Render;
             e.ZoneChanged -= OnZoneChanged;
-            e.RewardWon -= rewardPopup.Show;
+            e.RewardWon -= OnRewardWon;
             e.BombExploded -= OnBombExploded;
             e.RewardsBanked -= cashOutScreen.Show;
             e.CurrencyChanged -= hudView.SetCurrency;
-            e.WalletChanged -= hudView.SetRunCount;
+            e.WalletChanged -= OnWalletChanged;
             e.PhaseChanged -= OnPhaseChanged;
+        }
+
+        private void OnRewardWon(Reward reward)
+        {
+            rewardPopup.Show(reward);
+            inventoryView.AddItem(reward);
+        }
+
+        private void OnWalletChanged(int runCount)
+        {
+            hudView.SetRunCount(runCount);
+            if (runCount == 0) inventoryView.Clear(); // cash-out or bomb give-up
         }
 
         private void OnZoneChanged(int zone, ZoneType type)
@@ -111,6 +124,7 @@ namespace Wof.Presentation
             bombScreen.Hide();
             cashOutScreen.Hide();
             gameOverScreen.Hide();
+            inventoryView.Hide();
         }
 
         // ---- UI -> logic (forwarded to whatever state accepts it) -----------
@@ -126,6 +140,11 @@ namespace Wof.Presentation
                 onGiveUp: () => Forward<IReviveInput>(s => s.OnGiveUp()));
             cashOutScreen.BindConfirm(() => Forward<ICashOutInput>(s => s.OnConfirm()));
             gameOverScreen.BindRestart(() => Forward<IRestartInput>(s => s.OnRestart()));
+
+            // inventory is a read-only viewer — pure presentation, no game rule involved,
+            // so it's wired view-to-view instead of through the state machine
+            hudView.BindInventory(() => inventoryView.Show());
+            inventoryView.BindClose(() => inventoryView.Hide());
         }
 
         /// <summary>Routes a player input to the active state only if it accepts that input.</summary>

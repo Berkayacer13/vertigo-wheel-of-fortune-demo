@@ -338,6 +338,7 @@ namespace Wof.EditorTools
             var bomb = BuildBombScreen(safeArea);
             var cashout = BuildCashOutScreen(safeArea);
             var gameover = BuildGameOverScreen(safeArea);
+            var inventory = BuildInventory(safeArea, registry); // last sibling -> draws on top
 
             var controller = new GameObject("game_controller").AddComponent<GameController>();
             var so = new SerializedObject(controller);
@@ -349,6 +350,7 @@ namespace Wof.EditorTools
             so.FindProperty("bombScreen").objectReferenceValue = bomb;
             so.FindProperty("cashOutScreen").objectReferenceValue = cashout;
             so.FindProperty("gameOverScreen").objectReferenceValue = gameover;
+            so.FindProperty("inventoryView").objectReferenceValue = inventory;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             // overlays start hidden; Show()/Hide() toggle them at runtime
@@ -356,6 +358,7 @@ namespace Wof.EditorTools
             bomb.gameObject.SetActive(false);
             cashout.gameObject.SetActive(false);
             gameover.gameObject.SetActive(false);
+            inventory.gameObject.SetActive(false);
 
             Directory.CreateDirectory("Assets/_Project/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -431,7 +434,17 @@ namespace Wof.EditorTools
             Place(zoneText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(120, 0), new Vector2(300, 70));
 
             var runText = AddText("ui_text_runcount_value", hud, "0", 38, TextAlignmentOptions.MidlineRight);
-            Place(runText.rectTransform, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-40, 0), new Vector2(200, 64));
+            runText.rectTransform.pivot = new Vector2(1, 0.5f); // rect ends AT x, no off-screen spill
+            Place(runText.rectTransform, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-40, 0), new Vector2(160, 64));
+
+            // inventory (run stash) button — chest icon on a small grey button
+            var invBtn = AddButton("ui_button_inventory", hud, "", 1, LoadIcon("UI_button_grey_standard"));
+            var invRect = (RectTransform)invBtn.transform;
+            invRect.pivot = new Vector2(1, 0.5f);
+            Place(invRect, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-215, 0), new Vector2(86, 86));
+            var invIcon = AddImage("ui_image_inventory_icon", invRect, LoadIcon("UI_icon_chest_small_noligt"), Color.white, false);
+            Place(invIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(62, 62));
+            invIcon.preserveAspect = true;
 
             return hud.gameObject.AddComponent<HudView>();
         }
@@ -602,6 +615,57 @@ namespace Wof.EditorTools
             return view;
         }
 
+        private static InventoryView BuildInventory(RectTransform parent, SpriteRegistry registry)
+        {
+            var overlay = BuildOverlay("ui_screen_inventory", parent);
+
+            var panel = AddImage("ui_image_inventory_panel", overlay, LoadIcon("ui_card_panel_zone_bg"), Color.white, false);
+            panel.type = Image.Type.Sliced;
+            Place(panel.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(920, 1240));
+
+            var title = AddText("ui_text_inventory_title", panel.rectTransform, "COLLECTED REWARDS", 48, TextAlignmentOptions.Center);
+            Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -70), new Vector2(800, 80));
+            title.color = new Color(1f, 0.78f, 0.18f);
+            title.fontStyle = FontStyles.Bold;
+
+            var grid = NewRect("ui_inventory_grid", panel.rectTransform);
+            Place(grid, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(820, 920));
+            var layout = grid.gameObject.AddComponent<GridLayoutGroup>();
+            layout.cellSize = new Vector2(150, 175);
+            layout.spacing = new Vector2(14, 14);
+            layout.childAlignment = TextAnchor.UpperCenter;
+            layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+            layout.constraintCount = 5;
+
+            // inactive blueprint cell; InventoryView clones it per collected reward
+            var template = NewRect("ui_item_template", grid);
+            var cellBg = AddImage("ui_image_item_frame", template, LoadIcon("ui_card_frame_12px_neutral"), Color.white, false);
+            cellBg.type = Image.Type.Sliced;
+            Stretch(cellBg.rectTransform);
+            var itemIcon = AddImage("ui_image_item_icon_value", template, null, Color.white, false);
+            Place(itemIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 22), new Vector2(110, 110));
+            var itemAmount = AddText("ui_text_item_amount_value", template, "", 26, TextAlignmentOptions.Center);
+            Place(itemAmount.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -62), new Vector2(140, 36));
+            template.gameObject.SetActive(false);
+
+            var empty = AddText("ui_text_inventory_empty_value", panel.rectTransform, "Nothing collected yet — spin the wheel!", 34, TextAlignmentOptions.Center);
+            Place(empty.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(700, 90));
+
+            var close = AddButton("ui_button_inventory_close", panel.rectTransform, "CLOSE", 36, LoadIcon("UI_button_grey_standard"));
+            Place((RectTransform)close.transform, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 90), new Vector2(340, 105));
+
+            var view = overlay.gameObject.AddComponent<InventoryView>();
+            var so = new SerializedObject(view);
+            so.FindProperty("root").objectReferenceValue = overlay.gameObject;
+            so.FindProperty("grid").objectReferenceValue = grid;
+            so.FindProperty("itemTemplate").objectReferenceValue = template;
+            so.FindProperty("emptyValue").objectReferenceValue = empty;
+            so.FindProperty("closeButton").objectReferenceValue = close;
+            so.FindProperty("sprites").objectReferenceValue = registry;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return view;
+        }
+
         private static GameOverView BuildGameOverScreen(RectTransform parent)
         {
             var overlay = BuildOverlay("ui_screen_gameover", parent);
@@ -693,6 +757,10 @@ namespace Wof.EditorTools
             img.maskable = false;
             var btn = rt.gameObject.AddComponent<Button>();
             btn.targetGraphic = img;
+            // make the disabled state unmistakable (e.g. LEAVE is locked until zone 5/30)
+            var colors = btn.colors;
+            colors.disabledColor = new Color(0.32f, 0.32f, 0.32f, 0.55f);
+            btn.colors = colors;
 
             var text = AddText("ui_text_button_label", rt, label, fontSize, TextAlignmentOptions.Center);
             Stretch(text.rectTransform);
