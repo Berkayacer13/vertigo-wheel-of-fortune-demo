@@ -22,7 +22,15 @@ namespace Wof.Presentation
         [SerializeField] private Button closeButton;        // ui_button_inventory_close
         [SerializeField] private SpriteRegistry sprites;
 
-        private readonly List<GameObject> _cells = new List<GameObject>();
+        private sealed class ItemStack
+        {
+            public GameObject Cell;
+            public TMP_Text AmountText;
+            public int Total;
+        }
+
+        // one cell per reward id; repeat wins stack into the same cell (x10 + x25 -> x35)
+        private readonly Dictionary<string, ItemStack> _stacks = new Dictionary<string, ItemStack>();
         private Action _onClose;
 
         public void BindClose(Action onClose) => _onClose = onClose;
@@ -31,13 +39,20 @@ namespace Wof.Presentation
         private void OnDisable() { if (closeButton != null) closeButton.onClick.RemoveListener(HandleClose); }
         private void HandleClose() => _onClose?.Invoke();
 
-        /// <summary>Append one collected reward to the grid.</summary>
+        /// <summary>Add one collected reward, stacking onto an existing cell of the same id.</summary>
         public void AddItem(Reward reward)
         {
             if (itemTemplate == null) return;
 
+            if (_stacks.TryGetValue(reward.Id, out var stack))
+            {
+                stack.Total += reward.Amount;
+                if (stack.AmountText != null) stack.AmountText.text = $"x{stack.Total}";
+                return;
+            }
+
             var cell = UnityEngine.Object.Instantiate(itemTemplate.gameObject, grid);
-            cell.name = $"ui_item_{reward.Id}_{_cells.Count}";
+            cell.name = $"ui_item_{reward.Id}";
 
             var icon = cell.transform.FindDeep("ui_image_item_icon_value")?.GetComponent<Image>();
             if (icon != null)
@@ -49,19 +64,20 @@ namespace Wof.Presentation
             if (amount != null) amount.text = $"x{reward.Amount}";
 
             cell.SetActive(true);
-            _cells.Add(cell);
+            _stacks[reward.Id] = new ItemStack { Cell = cell, AmountText = amount, Total = reward.Amount };
             RefreshEmptyLabel();
         }
 
         /// <summary>Wallet went empty (cash-out or bomb give-up) — drop everything.</summary>
         public void Clear()
         {
-            foreach (var cell in _cells) Destroy(cell);
-            _cells.Clear();
+            foreach (var stack in _stacks.Values) Destroy(stack.Cell);
+            _stacks.Clear();
             RefreshEmptyLabel();
         }
 
-        public int ItemCount => _cells.Count;
+        /// <summary>Distinct reward stacks currently shown.</summary>
+        public int ItemCount => _stacks.Count;
 
         public void Show()
         {
@@ -73,7 +89,7 @@ namespace Wof.Presentation
 
         private void RefreshEmptyLabel()
         {
-            if (emptyValue != null) emptyValue.gameObject.SetActive(_cells.Count == 0);
+            if (emptyValue != null) emptyValue.gameObject.SetActive(_stacks.Count == 0);
         }
 
 #if UNITY_EDITOR

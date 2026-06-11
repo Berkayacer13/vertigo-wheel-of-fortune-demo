@@ -25,8 +25,18 @@ namespace Wof.Presentation
         public void Show(IReadOnlyList<Reward> banked)
         {
             if (root != null) root.SetActive(true);
-            if (summaryValue != null)
-                summaryValue.text = $"You walked away with {banked.Count} reward(s)!";
+            if (summaryValue == null) return;
+
+            // currencies go straight to the balances; everything else is "items"
+            int gold = 0, cash = 0, items = 0;
+            foreach (var r in banked)
+            {
+                if (r.Kind == RewardKind.Gold) gold += r.Amount;
+                else if (r.Kind == RewardKind.Cash) cash += r.Amount;
+                else items++;
+            }
+            summaryValue.text =
+                $"YOU WALKED AWAY!\n\n+{gold} Gold   +{cash} Cash\n{items} item(s) collected";
         }
 
         public void Hide() { if (root != null) root.SetActive(false); }

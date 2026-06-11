@@ -22,15 +22,20 @@ namespace Wof.Tests.PlayMode
         private static Reward Gold(int amount) =>
             new Reward("gold", RewardKind.Gold, amount, "UI_icon_gold");
 
+        private static Reward Grenade() =>
+            new Reward("grenade", RewardKind.Consumable, 2, "ui_icon_render_cons_grenade_m26");
+
         [UnityTest]
-        public IEnumerator Items_accumulate_and_clear()
+        public IEnumerator Same_reward_stacks_into_one_cell()
         {
             var inv = Object.FindObjectOfType<InventoryView>(true);
             Assert.IsNotNull(inv, "InventoryView missing from scene");
 
             inv.AddItem(Gold(10));
-            inv.AddItem(Gold(25));
-            Assert.AreEqual(2, inv.ItemCount);
+            inv.AddItem(Gold(25));   // same id -> stacks, amounts sum
+            inv.AddItem(Grenade());  // different id -> new cell
+
+            Assert.AreEqual(2, inv.ItemCount, "gold x2 must stack into a single cell");
 
             inv.Clear();
             Assert.AreEqual(0, inv.ItemCount);
