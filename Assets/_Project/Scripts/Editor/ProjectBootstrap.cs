@@ -430,8 +430,7 @@ namespace Wof.EditorTools
             cashText.rectTransform.pivot = new Vector2(0, 0.5f);
             Place(cashText.rectTransform, new Vector2(0, 0.5f), new Vector2(0, 0.5f), new Vector2(345, 0), new Vector2(170, 64));
 
-            var zoneText = AddText("ui_text_zone_value", hud, "ZONE 1", 44, TextAlignmentOptions.Center);
-            Place(zoneText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(120, 0), new Vector2(300, 70));
+            var zoneTrack = BuildZoneTrack(hud);
 
             var runText = AddText("ui_text_runcount_value", hud, "0", 38, TextAlignmentOptions.MidlineRight);
             runText.rectTransform.pivot = new Vector2(1, 0.5f); // rect ends AT x, no off-screen spill
@@ -446,7 +445,69 @@ namespace Wof.EditorTools
             Place(invIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(62, 62));
             invIcon.preserveAspect = true;
 
-            return hud.gameObject.AddComponent<HudView>();
+            var hudView = hud.gameObject.AddComponent<HudView>();
+            var hso = new SerializedObject(hudView);
+            hso.FindProperty("zoneTrack").objectReferenceValue = zoneTrack;
+            hso.ApplyModifiedPropertiesWithoutUndo();
+            return hudView;
+        }
+
+        /// <summary>
+        /// Top progress strip: a centred row of zone numbers on its own line under the
+        /// currency row, with the active zone boxed (replaces the old "ZONE n" label).
+        /// </summary>
+        private static ZoneTrackView BuildZoneTrack(RectTransform hud)
+        {
+            const int cellCount = 7;
+            const float cellSize = 62f;
+            const float pitch = 72f;
+
+            var track = NewRect("ui_zone_track", hud);
+            // own row, centred, dropped well clear of the currency + inventory row above
+            Place(track, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
+                new Vector2(0f, -178f), new Vector2(pitch * cellCount + 24f, 78f));
+
+            // solid dark rounded bar (the *_frame sprite is hollow -> reads as two boxes)
+            var bg = AddImage("ui_image_zone_track_bg", track, LoadIcon("ui_card_panel_zone_bg"), Color.white, false);
+            bg.type = Image.Type.Sliced;
+            Stretch(bg.rectTransform);
+
+            var cells = new ZoneCell[cellCount];
+            float startX = -pitch * (cellCount - 1) / 2f;
+            for (int i = 0; i < cellCount; i++)
+            {
+                var cell = NewRect($"ui_zone_cell_{i}", track);
+                Place(cell, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                    new Vector2(startX + i * pitch, 0f), new Vector2(cellSize, cellSize));
+
+                var hl = AddImage("ui_image_zone_cell_highlight", cell,
+                    LoadIcon("ui_card_panel_zone_current_white"), new Color(0.30f, 0.85f, 0.30f), false);
+                hl.type = Image.Type.Sliced;
+                Place(hl.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(cellSize, cellSize));
+                hl.enabled = false; // only the active cell turns this on
+
+                var label = AddText("ui_text_zone_cell_value", cell, "", 34, TextAlignmentOptions.Center);
+                Stretch(label.rectTransform);
+                label.fontStyle = FontStyles.Bold;
+
+                var cellView = cell.gameObject.AddComponent<ZoneCell>();
+                var cso = new SerializedObject(cellView);
+                cso.FindProperty("highlight").objectReferenceValue = hl;
+                cso.FindProperty("label").objectReferenceValue = label;
+                cso.ApplyModifiedPropertiesWithoutUndo();
+                cells[i] = cellView;
+            }
+
+            var view = track.gameObject.AddComponent<ZoneTrackView>();
+            var so = new SerializedObject(view);
+            so.FindProperty("safeInterval").intValue = ZoneRules.DefaultSafeInterval;
+            so.FindProperty("superInterval").intValue = ZoneRules.DefaultSuperInterval;
+            var arr = so.FindProperty("cells");
+            arr.arraySize = cells.Length;
+            for (int i = 0; i < cells.Length; i++)
+                arr.GetArrayElementAtIndex(i).objectReferenceValue = cells[i];
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return view;
         }
 
         private static WheelView BuildWheel(RectTransform parent, GameSettings settings, SpriteRegistry registry)
@@ -480,12 +541,15 @@ namespace Wof.EditorTools
                 Place(slice, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
                 slice.localRotation = Quaternion.Euler(0, 0, -45f * i);
 
+                // chamber centres sit at 0.60 of the rotor radius (~270 on the 900px rotor,
+                // measured from the cylinder art), so the icon is centred there and the
+                // amount badge hugs its lower edge — both land inside the chamber hole.
                 var icon = AddImage("ui_image_slice_icon_value", slice, null, Color.white, false);
-                Place(icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 295), new Vector2(135, 135));
+                Place(icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 270), new Vector2(145, 145));
                 icon.preserveAspect = true;
 
-                var amount = AddText("ui_text_slice_amount_value", slice, "", 34, TextAlignmentOptions.Center);
-                Place(amount.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 195), new Vector2(170, 50));
+                var amount = AddText("ui_text_slice_amount_value", slice, "", 30, TextAlignmentOptions.Center);
+                Place(amount.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 205), new Vector2(150, 42));
 
                 var view = slice.gameObject.AddComponent<SliceView>();
                 var sso = new SerializedObject(view);
@@ -540,8 +604,15 @@ namespace Wof.EditorTools
             var amount = AddText("ui_text_reward_amount_value", card.rectTransform, "x1", 64, TextAlignmentOptions.Center);
             Place(amount.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -140), new Vector2(420, 100));
 
-            var collect = AddButton("ui_button_collect", overlay, "COLLECT", 44, LoadIcon("UI_button_orange_standard"));
-            Place((RectTransform)collect.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -560), new Vector2(420, 130));
+            // collect sits centred alone, or shares the row with leave on safe/super zones;
+            // the view sets the X at runtime so both fit even on 4:3.
+            var collect = AddButton("ui_button_collect", overlay, "COLLECT", 40, LoadIcon("UI_button_orange_standard"));
+            Place((RectTransform)collect.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -560), new Vector2(380, 130));
+
+            // shown only on safe/super zones (toggled by the view) — bank the run + walk away
+            var leave = AddButton("ui_button_reward_leave", overlay, "LEAVE & COLLECT", 32, LoadIcon("UI_button_grey_standard"));
+            Place((RectTransform)leave.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(205, -560), new Vector2(380, 130));
+            leave.gameObject.SetActive(false);
 
             var view = overlay.gameObject.AddComponent<RewardPopupView>();
             var so = new SerializedObject(view);
@@ -550,6 +621,7 @@ namespace Wof.EditorTools
             so.FindProperty("iconValue").objectReferenceValue = icon;
             so.FindProperty("amountValue").objectReferenceValue = amount;
             so.FindProperty("collectButton").objectReferenceValue = collect;
+            so.FindProperty("leaveButton").objectReferenceValue = leave;
             so.FindProperty("sprites").objectReferenceValue = registry;
             so.ApplyModifiedPropertiesWithoutUndo();
             return view;

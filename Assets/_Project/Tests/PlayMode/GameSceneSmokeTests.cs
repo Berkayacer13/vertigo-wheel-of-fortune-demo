@@ -39,11 +39,22 @@ namespace Wof.Tests.PlayMode
             return null;
         }
 
+        /// <summary>The zone number shown by the highlighted cell on the top zone-track.</summary>
+        private static string ActiveZoneLabel()
+        {
+            foreach (var img in Object.FindObjectsOfType<Image>(true))
+            {
+                if (img.name != "ui_image_zone_cell_highlight" || !img.enabled) continue;
+                var label = img.transform.parent.Find("ui_text_zone_cell_value");
+                return label != null ? label.GetComponent<TMP_Text>().text : null;
+            }
+            return null;
+        }
+
         [UnityTest]
         public IEnumerator Boot_lands_in_zone1_idle_with_spin_enabled()
         {
-            var zone = FindAny("ui_text_zone_value").GetComponent<TMP_Text>();
-            Assert.AreEqual("ZONE 1", zone.text);
+            Assert.AreEqual("1", ActiveZoneLabel(), "zone-track should highlight zone 1 at boot");
 
             var spin = FindButton("ui_button_spin");
             Assert.IsNotNull(spin, "spin button missing");
@@ -73,8 +84,7 @@ namespace Wof.Tests.PlayMode
             {
                 FindButton("ui_button_collect").onClick.Invoke();
                 yield return null;
-                var zone = FindAny("ui_text_zone_value").GetComponent<TMP_Text>();
-                Assert.AreEqual("ZONE 2", zone.text, "collect should advance to zone 2");
+                Assert.AreEqual("2", ActiveZoneLabel(), "collect should advance to zone 2");
             }
             else
             {

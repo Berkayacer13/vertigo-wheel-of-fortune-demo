@@ -11,7 +11,7 @@ namespace Wof.Presentation
     {
         [SerializeField] private TMP_Text goldValue;     // ui_text_currency_gold_value
         [SerializeField] private TMP_Text cashValue;     // ui_text_currency_cash_value
-        [SerializeField] private TMP_Text zoneValue;     // ui_text_zone_value
+        [SerializeField] private ZoneTrackView zoneTrack; // ui_zone_track
         [SerializeField] private TMP_Text runCountValue; // ui_text_runcount_value
         [SerializeField] private Button inventoryButton; // ui_button_inventory
 
@@ -36,7 +36,7 @@ namespace Wof.Presentation
 
         public void SetZone(int zone, ZoneType type)
         {
-            if (zoneValue != null) zoneValue.text = $"ZONE {zone}";
+            if (zoneTrack != null) zoneTrack.SetZone(zone);
         }
 
 #if UNITY_EDITOR
@@ -44,7 +44,7 @@ namespace Wof.Presentation
         {
             Bind(ref goldValue, "ui_text_currency_gold_value");
             Bind(ref cashValue, "ui_text_currency_cash_value");
-            Bind(ref zoneValue, "ui_text_zone_value");
+            Bind(ref zoneTrack, "ui_zone_track");
             Bind(ref runCountValue, "ui_text_runcount_value");
             Bind(ref inventoryButton, "ui_button_inventory");
         }
