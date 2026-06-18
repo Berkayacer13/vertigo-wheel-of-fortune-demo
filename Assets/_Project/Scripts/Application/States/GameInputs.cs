@@ -13,7 +13,8 @@ namespace Wof.Application
 
     public interface ICollectInput
     {
-        void OnCollect();
+        void OnCollect();          // bank into the run + continue to the next zone
+        void OnCollectAndLeave();  // bank into the run + cash out now (safe/super zones only)
     }
 
     public interface IReviveInput

@@ -75,7 +75,9 @@ namespace Wof.Presentation
 
         private void OnRewardWon(Reward reward)
         {
-            rewardPopup.Show(reward);
+            // on a safe/super zone the popup also offers "leave & collect" so the player can
+            // bank the just-won silver/golden reward and walk away without re-entering risk
+            rewardPopup.Show(reward, _canLeaveCurrentZone);
             inventoryView.AddItem(reward);
         }
 
@@ -134,6 +136,7 @@ namespace Wof.Presentation
             wheelView.BindInput(onSpin: () => Forward<ISpinInput>(s => s.OnSpin()),
                                 onLeave: () => Forward<ISpinInput>(s => s.OnLeave()));
             rewardPopup.BindCollect(() => Forward<ICollectInput>(s => s.OnCollect()));
+            rewardPopup.BindLeave(() => Forward<ICollectInput>(s => s.OnCollectAndLeave()));
             bombScreen.BindInput(
                 onReviveGold: () => Forward<IReviveInput>(s => s.OnReviveGold()),
                 onReviveAd: () => Forward<IReviveInput>(s => s.OnReviveAd()),
