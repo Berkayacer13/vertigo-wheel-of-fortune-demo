@@ -408,6 +408,7 @@ namespace Wof.EditorTools
             cam.clearFlags = CameraClearFlags.SolidColor;
             cam.backgroundColor = new Color(0.07f, 0.05f, 0.06f);
             cam.orthographic = true;
+            cam.gameObject.AddComponent<AudioListener>(); // without this nothing is audible
         }
 
         private static void BuildEventSystem()
