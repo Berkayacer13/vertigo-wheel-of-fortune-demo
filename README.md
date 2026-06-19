@@ -9,6 +9,22 @@ or **super** (every 30th) zone.
 > Engine: **Unity 2021 LTS** · Platform: **Android (APK)** · UI: **TextMeshPro**, Canvas Scaler "Expand"
 > Aspect targets: **20:9 / 16:9 / 4:3**
 
+## Download & demo
+
+- 🎥 **Gameplay video** — [Google Drive](https://drive.google.com/file/d/1ZFh8yhtDx13A2jwNZ_Joq3uI_pIYskFa/view?usp=sharing)
+- 📦 **Android APK** — [Releases ▸ v1.0.0](https://github.com/Berkayacer13/vertigo-wheel-of-fortune-demo/releases/tag/v1.0.0)
+- 🖼️ **Screenshots** (20:9 / 16:9 / 4:3) — [docs/screenshots/](docs/screenshots/)
+
+## Gameplay
+
+- **Zone progress counter** at the top tracks your run; the active zone is highlighted,
+  safe (every 5th) and super (every 30th) zones are colour-coded.
+- **Spin** the revolver wheel — win a reward (stacks + grows each zone) or hit the **bomb**.
+- **Safe / super zones** are risk-free (silver / golden spin, no bomb). After a safe-zone
+  win you may **cash out from the reward popup** instead of pushing back into risk.
+- **Bomb** wipes the run — *revive* with gold (or ad), or *restart* from zone 1.
+- **Sound**: SFX for spin, win, bomb, cash-out and UI clicks.
+
 ## Architecture
 
 A strictly layered, SOLID design. The lower layers compile and unit-test with **no UI**.
@@ -88,4 +104,7 @@ See the git log for the feature-by-feature progression.
 - `Game.unity` scene with the brief's naming/raycast/sliced-sprite rules — done
 - Sprite Atlas, TMP, DOTween — done
 - PlayMode smoke tests (boot → spin → resolve → next zone) — done
+- Top zone progress counter + reward-popup cash-out on safe/super zones — done
+- Audio: `SoundBank` ScriptableObject + `AudioService` (event-bus driven), spin/win/
+  bomb/cash-out/click SFX — done
 - Android APK (IL2CPP/ARM64) — built via `BuildApk`, published as GitHub release
