@@ -21,6 +21,7 @@ namespace Wof.EditorTools
     public static class ProjectBootstrap
     {
         private const string ArtDir = "Assets/_Project/Art";
+        private const string AudioDir = "Assets/_Project/Audio";
         private const string SettingsDir = "Assets/_Project/Settings";
         private const string ScenePath = "Assets/_Project/Scenes/Game.unity";
 
@@ -48,6 +49,7 @@ namespace Wof.EditorTools
             var wheels = CreateWheelConfigs(rewards);
             CreateTuningAndSettings(wheels);
             CreateSpriteRegistry(rewards);
+            CreateSoundBank();
             ConfigurePlayerSettings();
             AssetDatabase.SaveAssets();
             Debug.Log("[Bootstrap] Assets created.");
@@ -295,6 +297,22 @@ namespace Wof.EditorTools
             so.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        private static void CreateSoundBank()
+        {
+            var bank = LoadOrCreate<SoundBank>($"{SettingsDir}/sound_bank.asset");
+            var so = new SerializedObject(bank);
+            so.FindProperty("click").objectReferenceValue = LoadClip("sfx_click");
+            so.FindProperty("spin").objectReferenceValue = LoadClip("sfx_spin");
+            so.FindProperty("win").objectReferenceValue = LoadClip("sfx_win");
+            so.FindProperty("bomb").objectReferenceValue = LoadClip("sfx_bomb");
+            so.FindProperty("cashOut").objectReferenceValue = LoadClip("sfx_cashout");
+            so.ApplyModifiedPropertiesWithoutUndo();
+            EditorUtility.SetDirty(bank);
+        }
+
+        private static AudioClip LoadClip(string name) =>
+            AssetDatabase.LoadAssetAtPath<AudioClip>($"{AudioDir}/{name}.wav");
+
         private static T LoadOrCreate<T>(string path) where T : ScriptableObject
         {
             var asset = AssetDatabase.LoadAssetAtPath<T>(path);
@@ -340,6 +358,8 @@ namespace Wof.EditorTools
             var gameover = BuildGameOverScreen(safeArea);
             var inventory = BuildInventory(safeArea, registry); // last sibling -> draws on top
 
+            var audioService = BuildAudioService();
+
             var controller = new GameObject("game_controller").AddComponent<GameController>();
             var so = new SerializedObject(controller);
             so.FindProperty("tuning").objectReferenceValue = tuning;
@@ -351,6 +371,7 @@ namespace Wof.EditorTools
             so.FindProperty("cashOutScreen").objectReferenceValue = cashout;
             so.FindProperty("gameOverScreen").objectReferenceValue = gameover;
             so.FindProperty("inventoryView").objectReferenceValue = inventory;
+            so.FindProperty("audio").objectReferenceValue = audioService;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             // overlays start hidden; Show()/Hide() toggle them at runtime
@@ -364,6 +385,20 @@ namespace Wof.EditorTools
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
             Debug.Log("[Bootstrap] Scene built and saved.");
+        }
+
+        private static AudioService BuildAudioService()
+        {
+            var bank = AssetDatabase.LoadAssetAtPath<SoundBank>($"{SettingsDir}/sound_bank.asset");
+            var go = new GameObject("audio_service");
+            var src = go.AddComponent<AudioSource>();
+            src.playOnAwake = false;
+            var svc = go.AddComponent<AudioService>();
+            var so = new SerializedObject(svc);
+            so.FindProperty("bank").objectReferenceValue = bank;
+            so.FindProperty("source").objectReferenceValue = src;
+            so.ApplyModifiedPropertiesWithoutUndo();
+            return svc;
         }
 
         private static void BuildCamera()

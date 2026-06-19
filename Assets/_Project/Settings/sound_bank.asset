@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c96177a741244d0990324a27af5b5b2, type: 3}
+  m_Name: sound_bank
+  m_EditorClassIdentifier: 
+  click: {fileID: 8300000, guid: ec9b05fafa12942d8b8c5a8652e3ba21, type: 3}
+  spin: {fileID: 8300000, guid: 268d2587975e04e2dac0decc451a8679, type: 3}
+  win: {fileID: 8300000, guid: 322f2ba4c75be423ba475757f6faf574, type: 3}
+  bomb: {fileID: 8300000, guid: f473854964511409295d853fed29d0c1, type: 3}
+  cashOut: {fileID: 8300000, guid: c6de7cf762afb404297f783bed89c87c, type: 3}
+  volume: 0.8

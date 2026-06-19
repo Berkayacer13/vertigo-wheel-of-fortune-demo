@@ -23,6 +23,7 @@ namespace Wof.Presentation
         [SerializeField] private CashOutView cashOutScreen;
         [SerializeField] private GameOverView gameOverScreen;
         [SerializeField] private InventoryView inventoryView;
+        [SerializeField] private AudioService audio;
 
         private GameContext _ctx;
         private GameStateMachine _fsm;
@@ -51,9 +52,10 @@ namespace Wof.Presentation
             var e = _ctx.Events;
             e.WheelBuilt += wheelView.Render;
             e.ZoneChanged += OnZoneChanged;
+            e.SpinStarted += OnSpinStarted;
             e.RewardWon += OnRewardWon;
             e.BombExploded += OnBombExploded;
-            e.RewardsBanked += cashOutScreen.Show;
+            e.RewardsBanked += OnRewardsBanked;
             e.CurrencyChanged += hudView.SetCurrency;
             e.WalletChanged += OnWalletChanged;
             e.PhaseChanged += OnPhaseChanged;
@@ -65,13 +67,16 @@ namespace Wof.Presentation
             var e = _ctx.Events;
             e.WheelBuilt -= wheelView.Render;
             e.ZoneChanged -= OnZoneChanged;
+            e.SpinStarted -= OnSpinStarted;
             e.RewardWon -= OnRewardWon;
             e.BombExploded -= OnBombExploded;
-            e.RewardsBanked -= cashOutScreen.Show;
+            e.RewardsBanked -= OnRewardsBanked;
             e.CurrencyChanged -= hudView.SetCurrency;
             e.WalletChanged -= OnWalletChanged;
             e.PhaseChanged -= OnPhaseChanged;
         }
+
+        private void OnSpinStarted() => Sfx(a => a.PlaySpin());
 
         private void OnRewardWon(Reward reward)
         {
@@ -79,6 +84,13 @@ namespace Wof.Presentation
             // bank the just-won silver/golden reward and walk away without re-entering risk
             rewardPopup.Show(reward, _canLeaveCurrentZone);
             inventoryView.AddItem(reward);
+            Sfx(a => a.PlayWin());
+        }
+
+        private void OnRewardsBanked(System.Collections.Generic.IReadOnlyList<Reward> banked)
+        {
+            cashOutScreen.Show(banked);
+            Sfx(a => a.PlayCashOut());
         }
 
         private void OnWalletChanged(int runCount)
@@ -95,7 +107,13 @@ namespace Wof.Presentation
             wheelView.SetLeaveEnabled(false); // re-enabled once we settle into Idle
         }
 
-        private void OnBombExploded() => bombScreen.Show(_ctx.Settings.reviveGoldCost);
+        private void OnBombExploded()
+        {
+            bombScreen.Show(_ctx.Settings.reviveGoldCost);
+            Sfx(a => a.PlayBomb());
+        }
+
+        private void Sfx(System.Action<AudioService> play) { if (audio != null) play(audio); }
 
         private void OnPhaseChanged(GamePhase phase)
         {
@@ -133,21 +151,28 @@ namespace Wof.Presentation
 
         private void BindViewInputs()
         {
-            wheelView.BindInput(onSpin: () => Forward<ISpinInput>(s => s.OnSpin()),
-                                onLeave: () => Forward<ISpinInput>(s => s.OnLeave()));
-            rewardPopup.BindCollect(() => Forward<ICollectInput>(s => s.OnCollect()));
-            rewardPopup.BindLeave(() => Forward<ICollectInput>(s => s.OnCollectAndLeave()));
+            wheelView.BindInput(onSpin: () => Press<ISpinInput>(s => s.OnSpin()),
+                                onLeave: () => Press<ISpinInput>(s => s.OnLeave()));
+            rewardPopup.BindCollect(() => Press<ICollectInput>(s => s.OnCollect()));
+            rewardPopup.BindLeave(() => Press<ICollectInput>(s => s.OnCollectAndLeave()));
             bombScreen.BindInput(
-                onReviveGold: () => Forward<IReviveInput>(s => s.OnReviveGold()),
-                onReviveAd: () => Forward<IReviveInput>(s => s.OnReviveAd()),
-                onGiveUp: () => Forward<IReviveInput>(s => s.OnGiveUp()));
-            cashOutScreen.BindConfirm(() => Forward<ICashOutInput>(s => s.OnConfirm()));
-            gameOverScreen.BindRestart(() => Forward<IRestartInput>(s => s.OnRestart()));
+                onReviveGold: () => Press<IReviveInput>(s => s.OnReviveGold()),
+                onReviveAd: () => Press<IReviveInput>(s => s.OnReviveAd()),
+                onGiveUp: () => Press<IReviveInput>(s => s.OnGiveUp()));
+            cashOutScreen.BindConfirm(() => Press<ICashOutInput>(s => s.OnConfirm()));
+            gameOverScreen.BindRestart(() => Press<IRestartInput>(s => s.OnRestart()));
 
             // inventory is a read-only viewer — pure presentation, no game rule involved,
             // so it's wired view-to-view instead of through the state machine
-            hudView.BindInventory(() => inventoryView.Show());
-            inventoryView.BindClose(() => inventoryView.Hide());
+            hudView.BindInventory(() => { Sfx(a => a.PlayClick()); inventoryView.Show(); });
+            inventoryView.BindClose(() => { Sfx(a => a.PlayClick()); inventoryView.Hide(); });
+        }
+
+        /// <summary>Plays the click SFX, then routes the input to the active state.</summary>
+        private void Press<T>(System.Action<T> action) where T : class
+        {
+            Sfx(a => a.PlayClick());
+            Forward(action);
         }
 
         /// <summary>Routes a player input to the active state only if it accepts that input.</summary>
