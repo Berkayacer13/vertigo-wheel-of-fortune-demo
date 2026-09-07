@@ -13,10 +13,10 @@ namespace Wof.Tests
         private static EconomyService NewEconomy(uint gold = 100, uint cash = 0)
             => new EconomyService(new GameEvents(), gold, cash);
 
-        private static Reward Gold(int n) => new Reward("gold", RewardKind.Gold, n, "UI_icon_gold");
-        private static Reward Cash(int n) => new Reward("cash", RewardKind.Cash, n, "UI_icon_cash");
+        private static Reward Gold(uint amount) => new Reward("gold", RewardKind.Gold, amount, "UI_icon_gold");
+        private static Reward Cash(uint amount) => new Reward("cash", RewardKind.Cash, amount, "UI_icon_cash");
         private static Reward Skin() => new Reward("skin", RewardKind.WeaponSkin, 1, "skin");
-        private static Reward Chest(int n) => new Reward("chest", RewardKind.Chest, n, "chest");
+        private static Reward Chest(uint amount) => new Reward("chest", RewardKind.Chest, amount, "chest");
         private static Reward Bomb() => new Reward("bomb", RewardKind.Bomb, 1, "bomb");
 
         [Test]
@@ -104,13 +104,5 @@ namespace Wof.Tests
             Assert.Throws<System.OverflowException>(() => eco.AddGold(1));
         }
 
-        [Test]
-        public void Negative_currency_reward_is_rejected_when_banked()
-        {
-            var eco = NewEconomy();
-            eco.AddRunReward(new Reward("invalid_gold", RewardKind.Gold, -1, "UI_icon_gold"));
-
-            Assert.Throws<System.ArgumentOutOfRangeException>(() => eco.Bank());
-        }
     }
 }

@@ -26,7 +26,7 @@ namespace Wof.Presentation
         {
             public GameObject Cell;
             public TMP_Text AmountText;
-            public int Total;
+            public uint Total;
         }
 
         // one cell per reward id; repeat wins stack into the same cell (x10 + x25 -> x35)

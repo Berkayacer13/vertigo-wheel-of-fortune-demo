@@ -16,11 +16,14 @@ namespace Wof.Domain
         public Reward Scale(Reward baseReward, int zone)
         {
             if (baseReward.IsBomb) return baseReward;
-            int scaled = RoundHalfAwayFromZero(baseReward.Amount * _multiplier(zone));
+            uint scaled = ScaleAmount(baseReward.Amount, _multiplier(zone));
             return baseReward.WithAmount(scaled);
         }
 
-        private static int RoundHalfAwayFromZero(float v)
-            => (int)Math.Round(v, MidpointRounding.AwayFromZero);
+        private static uint ScaleAmount(uint amount, float multiplier)
+        {
+            double scaled = Math.Max(0d, Math.Round(amount * multiplier, MidpointRounding.AwayFromZero));
+            return checked((uint)scaled);
+        }
     }
 }

@@ -21,13 +21,22 @@ namespace Wof.Tests
             var scaler = new RewardScaler(zone => 1f + 0.5f * zone);
             var baseReward = new Reward("cash", RewardKind.Cash, 8, "ui_icon_cash");
 
-            int prev = 0;
+            uint prev = 0;
             for (int zone = 1; zone <= 30; zone++)
             {
-                int amount = scaler.Scale(baseReward, zone).Amount;
+                uint amount = scaler.Scale(baseReward, zone).Amount;
                 Assert.That(amount, Is.GreaterThanOrEqualTo(prev), $"zone {zone} should not pay less");
                 prev = amount;
             }
+        }
+
+        [Test]
+        public void Negative_multiplier_cannot_create_negative_reward()
+        {
+            var scaler = new RewardScaler(_ => -1f);
+            var reward = new Reward("gold", RewardKind.Gold, 10, "ui_icon_gold");
+
+            Assert.AreEqual(0u, scaler.Scale(reward, 1).Amount);
         }
 
         [Test]

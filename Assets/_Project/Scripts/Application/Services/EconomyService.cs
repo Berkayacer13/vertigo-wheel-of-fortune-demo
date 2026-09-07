@@ -46,8 +46,8 @@ namespace Wof.Application
             var banked = _wallet.CashOut();
             foreach (var r in banked)
             {
-                if (r.Kind == RewardKind.Gold) AddGold(ToCurrencyAmount(r));
-                else if (r.Kind == RewardKind.Cash) AddCash(ToCurrencyAmount(r));
+                if (r.Kind == RewardKind.Gold) AddGold(r.Amount);
+                else if (r.Kind == RewardKind.Cash) AddCash(r.Amount);
                 else if (r.Kind != RewardKind.Bomb) PermanentInventory.Add(r);
             }
             _events.RaiseWalletChanged(0);
@@ -75,12 +75,5 @@ namespace Wof.Application
             _events.RaiseCurrencyChanged(Gold, Cash);
         }
 
-        private static uint ToCurrencyAmount(Reward reward)
-        {
-            if (reward.Amount < 0)
-                throw new System.ArgumentOutOfRangeException(nameof(reward), "Currency reward amount cannot be negative.");
-
-            return checked((uint)reward.Amount);
-        }
     }
 }

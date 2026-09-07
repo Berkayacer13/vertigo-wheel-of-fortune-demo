@@ -8,12 +8,12 @@ namespace Wof.Domain
     {
         public readonly string Id;
         public readonly RewardKind Kind;
-        public readonly int Amount;
+        public readonly uint Amount;
 
         /// <summary>Sprite lookup key (asset name), not a Sprite — keeps the Domain UI-free.</summary>
         public readonly string IconKey;
 
-        public Reward(string id, RewardKind kind, int amount, string iconKey)
+        public Reward(string id, RewardKind kind, uint amount, string iconKey)
         {
             Id = id;
             Kind = kind;
@@ -24,6 +24,6 @@ namespace Wof.Domain
         public bool IsBomb => Kind == RewardKind.Bomb;
 
         /// <summary>Returns a copy with a new amount (used by the reward scaler).</summary>
-        public Reward WithAmount(int amount) => new Reward(Id, Kind, amount, IconKey);
+        public Reward WithAmount(uint amount) => new Reward(Id, Kind, amount, IconKey);
     }
 }

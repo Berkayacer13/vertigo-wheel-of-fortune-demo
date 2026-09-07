@@ -28,7 +28,8 @@ namespace Wof.Presentation
             if (summaryValue == null) return;
 
             // currencies go straight to the balances; everything else is "items"
-            int gold = 0, cash = 0, items = 0;
+            uint gold = 0, cash = 0;
+            int items = 0;
             foreach (var r in banked)
             {
                 if (r.Kind == RewardKind.Gold) gold += r.Amount;

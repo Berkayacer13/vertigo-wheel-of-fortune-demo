@@ -112,12 +112,12 @@ namespace Wof.EditorTools
         {
             public string File, Display, Icon;
             public RewardKind Kind;
-            public int Amount;
+            public uint Amount;
             public RarityTier Rarity;
             public WinVfx Vfx;
 
             public RewardSpec(string file, RewardKind kind, string display, string icon,
-                int amount, RarityTier rarity, WinVfx vfx)
+                uint amount, RarityTier rarity, WinVfx vfx)
             { File = file; Kind = kind; Display = display; Icon = icon; Amount = amount; Rarity = rarity; Vfx = vfx; }
         }
 
