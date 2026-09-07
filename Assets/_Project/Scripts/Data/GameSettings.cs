@@ -20,8 +20,8 @@ namespace Wof.Data
             new Keyframe(1f, 1f, 0f, 0f));                      // ease-out
 
         [Header("Economy")]
-        [Min(0)] public int startingGold = 100;
-        [Min(0)] public int reviveGoldCost = 25;                // matches the brief screenshot
-        [Min(0)] public int startingCash = 0;
+        [Min(0)] public uint startingGold = 100;
+        [Min(0)] public uint reviveGoldCost = 25;               // matches the brief screenshot
+        [Min(0)] public uint startingCash = 0;
     }
 }

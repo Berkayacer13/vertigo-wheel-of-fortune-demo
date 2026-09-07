@@ -44,7 +44,7 @@ namespace Wof.Presentation
         private void HandleReviveAd() => _onReviveAd?.Invoke();
         private void HandleGiveUp() => _onGiveUp?.Invoke();
 
-        public void Show(int reviveCost)
+        public void Show(uint reviveCost)
         {
             if (root != null) root.SetActive(true);
             if (reviveCostValue != null) reviveCostValue.text = reviveCost.ToString();

@@ -19,7 +19,7 @@ namespace Wof.Application
         public event Action BombExploded;
         public event Action<IReadOnlyList<Reward>> RewardsBanked;   // cash-out: the collected list
         public event Action<int> WalletChanged;             // run reward count
-        public event Action<int, int> CurrencyChanged;      // gold, cash
+        public event Action<uint, uint> CurrencyChanged;    // gold, cash
         public event Action<GamePhase> PhaseChanged;
 
         public void RaiseZoneChanged(int zone, ZoneType type) => ZoneChanged?.Invoke(zone, type);
@@ -30,7 +30,7 @@ namespace Wof.Application
         public void RaiseBombExploded() => BombExploded?.Invoke();
         public void RaiseRewardsBanked(IReadOnlyList<Reward> banked) => RewardsBanked?.Invoke(banked);
         public void RaiseWalletChanged(int runCount) => WalletChanged?.Invoke(runCount);
-        public void RaiseCurrencyChanged(int gold, int cash) => CurrencyChanged?.Invoke(gold, cash);
+        public void RaiseCurrencyChanged(uint gold, uint cash) => CurrencyChanged?.Invoke(gold, cash);
         public void RaisePhaseChanged(GamePhase phase) => PhaseChanged?.Invoke(phase);
     }
 }

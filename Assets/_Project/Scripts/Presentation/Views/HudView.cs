@@ -23,7 +23,7 @@ namespace Wof.Presentation
         private void OnDisable() { if (inventoryButton != null) inventoryButton.onClick.RemoveListener(HandleInventory); }
         private void HandleInventory() => _onInventory?.Invoke();
 
-        public void SetCurrency(int gold, int cash)
+        public void SetCurrency(uint gold, uint cash)
         {
             if (goldValue != null) goldValue.text = gold.ToString();
             if (cashValue != null) cashValue.text = cash.ToString();
