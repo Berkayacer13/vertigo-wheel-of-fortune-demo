@@ -19,11 +19,11 @@ namespace Wof.Tests.PlayMode
             yield return null;
         }
 
-        private static Reward Gold(int amount) =>
+        private static Reward Gold(uint amount) =>
             new Reward("gold", RewardKind.Gold, amount, "UI_icon_gold");
 
         private static Reward Grenade() =>
-            new Reward("grenade", RewardKind.Consumable, 2, "ui_icon_render_cons_grenade_m26");
+            new Reward("grenade", RewardKind.Consumable, 2u, "ui_icon_render_cons_grenade_m26");
 
         [UnityTest]
         public IEnumerator Same_reward_stacks_into_one_cell()
@@ -31,8 +31,8 @@ namespace Wof.Tests.PlayMode
             var inv = Object.FindObjectOfType<InventoryView>(true);
             Assert.IsNotNull(inv, "InventoryView missing from scene");
 
-            inv.AddItem(Gold(10));
-            inv.AddItem(Gold(25));   // same id -> stacks, amounts sum
+            inv.AddItem(Gold(10u));
+            inv.AddItem(Gold(25u));   // same id -> stacks, amounts sum
             inv.AddItem(Grenade());  // different id -> new cell
 
             Assert.AreEqual(2, inv.ItemCount, "gold x2 must stack into a single cell");
@@ -52,7 +52,7 @@ namespace Wof.Tests.PlayMode
             var hint = GameObject.Find("ui_text_inventory_empty_value");
             Assert.IsNotNull(hint, "empty hint should be visible when nothing collected");
 
-            inv.AddItem(Gold(5));
+            inv.AddItem(Gold(5u));
             yield return null;
             Assert.IsNull(GameObject.Find("ui_text_inventory_empty_value"),
                 "hint must hide once an item exists"); // Find only sees active objects

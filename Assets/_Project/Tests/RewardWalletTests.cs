@@ -5,14 +5,14 @@ namespace Wof.Tests
 {
     public class RewardWalletTests
     {
-        private static Reward Gold(int amount) => new Reward("gold", RewardKind.Gold, amount, "ui_icon_gold");
+        private static Reward Gold(uint amount) => new Reward("gold", RewardKind.Gold, amount, "ui_icon_gold");
 
         [Test]
         public void Accumulates_rewards()
         {
             var w = new RewardWallet();
-            w.Add(Gold(10));
-            w.Add(Gold(5));
+            w.Add(Gold(10u));
+            w.Add(Gold(5u));
             Assert.IsTrue(w.HasRewards);
             Assert.AreEqual(2, w.RunRewards.Count);
         }
@@ -21,7 +21,7 @@ namespace Wof.Tests
         public void Bomb_wipes_all()
         {
             var w = new RewardWallet();
-            w.Add(Gold(10));
+            w.Add(Gold(10u));
             w.DetonateBomb();
             Assert.IsFalse(w.HasRewards);
         }
@@ -30,8 +30,8 @@ namespace Wof.Tests
         public void CashOut_returns_then_clears()
         {
             var w = new RewardWallet();
-            w.Add(Gold(10));
-            w.Add(Gold(20));
+            w.Add(Gold(10u));
+            w.Add(Gold(20u));
 
             var banked = w.CashOut();
 

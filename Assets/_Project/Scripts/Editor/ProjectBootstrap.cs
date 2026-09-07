@@ -172,7 +172,7 @@ namespace Wof.EditorTools
                 so.FindProperty("kind").enumValueIndex = (int)spec.Kind;
                 so.FindProperty("displayName").stringValue = spec.Display;
                 so.FindProperty("icon").objectReferenceValue = LoadIcon(spec.Icon);
-                so.FindProperty("baseAmount").intValue = spec.Amount;
+                so.FindProperty("baseAmount").intValue = checked((int)spec.Amount);
                 so.FindProperty("rarity").enumValueIndex = (int)spec.Rarity;
                 so.FindProperty("winVfx").enumValueIndex = (int)spec.Vfx;
                 so.ApplyModifiedPropertiesWithoutUndo();
