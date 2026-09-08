@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a40c79b8ade07404ba8a953257b417b3, type: 3}
   m_Name: reward_shield
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier:
   id: reward_shield
   kind: 7
   displayName: Shield
