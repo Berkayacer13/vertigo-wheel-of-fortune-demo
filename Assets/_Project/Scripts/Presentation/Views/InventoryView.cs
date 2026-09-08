@@ -76,6 +76,24 @@ namespace Wof.Presentation
             RefreshEmptyLabel();
         }
 
+        public void RemoveItem(string rewardId, uint amount = 1)
+        {
+            if (!_stacks.TryGetValue(rewardId, out var stack)) return;
+
+            if (amount >= stack.Total)
+            {
+                Destroy(stack.Cell);
+                _stacks.Remove(rewardId);
+            }
+            else
+            {
+                stack.Total -= amount;
+                if (stack.AmountText != null) stack.AmountText.text = $"x{stack.Total}";
+            }
+
+            RefreshEmptyLabel();
+        }
+
         /// <summary>Distinct reward stacks currently shown.</summary>
         public int ItemCount => _stacks.Count;
 

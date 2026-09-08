@@ -56,6 +56,7 @@ namespace Wof.Presentation
             e.RewardWon += OnRewardWon;
             e.BombExploded += OnBombExploded;
             e.RewardsBanked += OnRewardsBanked;
+            e.RewardConsumed += OnRewardConsumed;
             e.CurrencyChanged += hudView.SetCurrency;
             e.WalletChanged += OnWalletChanged;
             e.PhaseChanged += OnPhaseChanged;
@@ -71,6 +72,7 @@ namespace Wof.Presentation
             e.RewardWon -= OnRewardWon;
             e.BombExploded -= OnBombExploded;
             e.RewardsBanked -= OnRewardsBanked;
+            e.RewardConsumed -= OnRewardConsumed;
             e.CurrencyChanged -= hudView.SetCurrency;
             e.WalletChanged -= OnWalletChanged;
             e.PhaseChanged -= OnPhaseChanged;
@@ -84,7 +86,14 @@ namespace Wof.Presentation
             // bank the just-won silver/golden reward and walk away without re-entering risk
             rewardPopup.Show(reward, _canLeaveCurrentZone);
             inventoryView.AddItem(reward);
+            hudView.SetRunCount(inventoryView.ItemCount);
             Sfx(a => a.PlayWin());
+        }
+
+        private void OnRewardConsumed(string rewardId)
+        {
+            inventoryView.RemoveItem(rewardId);
+            hudView.SetRunCount(inventoryView.ItemCount);
         }
 
         private void OnRewardsBanked(System.Collections.Generic.IReadOnlyList<Reward> banked)
@@ -95,8 +104,8 @@ namespace Wof.Presentation
 
         private void OnWalletChanged(int runCount)
         {
-            hudView.SetRunCount(runCount);
             if (runCount == 0) inventoryView.Clear(); // cash-out or bomb give-up
+            hudView.SetRunCount(inventoryView.ItemCount);
         }
 
         private void OnZoneChanged(int zone, ZoneType type)

@@ -31,7 +31,7 @@ namespace Wof.Presentation
 
         public void SetRunCount(int count)
         {
-            if (runCountValue != null) runCountValue.text = count.ToString();
+            if (runCountValue != null) runCountValue.text = $"STACKS: {count}";
         }
 
         public void SetZone(int zone, ZoneType type)

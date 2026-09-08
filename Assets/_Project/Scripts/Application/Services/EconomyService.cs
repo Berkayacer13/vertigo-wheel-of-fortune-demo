@@ -77,7 +77,11 @@ namespace Wof.Application
         public bool TryConsumeShield()
         {
             bool consumed = _wallet.TryConsume(RewardKind.Shield);
-            if (consumed) _events.RaiseWalletChanged(_wallet.RunRewards.Count);
+            if (consumed)
+            {
+                _events.RaiseRewardConsumed("reward_shield");
+                _events.RaiseWalletChanged(_wallet.RunRewards.Count);
+            }
             return consumed;
         }
 
