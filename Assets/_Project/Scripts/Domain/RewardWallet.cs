@@ -20,6 +20,18 @@ namespace Wof.Domain
         /// <summary>(R8) Bomb: lose everything collected this run.</summary>
         public void DetonateBomb() => _runRewards.Clear();
 
+        public bool TryConsume(RewardKind kind)
+        {
+            for (int i = 0; i < _runRewards.Count; i++)
+            {
+                if (_runRewards[i].Kind != kind) continue;
+                _runRewards.RemoveAt(i);
+                return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// (R10) Returns the banked rewards and clears the run. The caller is
         /// responsible for moving them into permanent inventory/currency.

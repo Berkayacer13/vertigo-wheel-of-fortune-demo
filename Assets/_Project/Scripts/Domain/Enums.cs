@@ -7,7 +7,7 @@ namespace Wof.Domain
     public enum ZoneType { Normal, Safe, Super }
 
     /// <summary>What a slice pays out. <see cref="Bomb"/> is the special "wipe" slice.</summary>
-    public enum RewardKind { Gold, Cash, WeaponSkin, Consumable, Chest, Points, SpecialSkin, Bomb }
+    public enum RewardKind { Gold, Cash, WeaponSkin, Consumable, Chest, Points, SpecialSkin, Shield, Bomb }
 
     /// <summary>Rarity bucket used to gate which rewards appear in early vs. late zones.</summary>
     public enum RarityTier { Tier1, Tier2, Tier3, Special }

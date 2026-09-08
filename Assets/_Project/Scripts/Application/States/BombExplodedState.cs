@@ -13,6 +13,13 @@ namespace Wof.Application
         public override void Enter()
         {
             Ctx.Events.RaisePhaseChanged(GamePhase.BombExploded);
+
+            if (Ctx.Economy.TryConsumeShield())
+            {
+                Fsm.Change(new IdleState(Ctx, Fsm));
+                return;
+            }
+
             Ctx.Events.RaiseBombExploded();
         }
 

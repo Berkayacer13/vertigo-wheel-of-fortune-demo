@@ -15,7 +15,7 @@ namespace Wof.Domain
 
         public Reward Scale(Reward baseReward, int zone)
         {
-            if (baseReward.IsBomb) return baseReward;
+            if (baseReward.IsBomb || baseReward.Kind == RewardKind.Shield) return baseReward;
             uint scaled = ScaleAmount(baseReward.Amount, _multiplier(zone));
             return baseReward.WithAmount(scaled);
         }

@@ -16,6 +16,16 @@ namespace Wof.Application
         public uint Cash { get; private set; }
         public RewardWallet Wallet => _wallet;
         public PermanentRewardInventory PermanentInventory { get; } = new PermanentRewardInventory();
+        public int ShieldCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (var reward in _wallet.RunRewards)
+                    if (reward.Kind == RewardKind.Shield) count += (int)reward.Amount;
+                return count;
+            }
+        }
 
         public EconomyService(GameEvents events, uint startGold, uint startCash)
         {
@@ -48,7 +58,8 @@ namespace Wof.Application
             {
                 if (r.Kind == RewardKind.Gold) AddGold(r.Amount);
                 else if (r.Kind == RewardKind.Cash) AddCash(r.Amount);
-                else if (r.Kind != RewardKind.Bomb) PermanentInventory.Add(r);
+                else if (r.Kind != RewardKind.Bomb && r.Kind != RewardKind.Shield)
+                    PermanentInventory.Add(r);
             }
             _events.RaiseWalletChanged(0);
             return banked;
@@ -61,6 +72,13 @@ namespace Wof.Application
             Gold -= cost;
             _events.RaiseCurrencyChanged(Gold, Cash);
             return true;
+        }
+
+        public bool TryConsumeShield()
+        {
+            bool consumed = _wallet.TryConsume(RewardKind.Shield);
+            if (consumed) _events.RaiseWalletChanged(_wallet.RunRewards.Count);
+            return consumed;
         }
 
         public void AddGold(uint amount)
