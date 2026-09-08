@@ -30,8 +30,8 @@ MonoBehaviour:
   - reward: {fileID: 11400000, guid: cd0b6348e273640ae9b4ed5cb12900b7, type: 2}
     weight: 1.5
     isBomb: 0
-  - reward: {fileID: 11400000, guid: 356cf4686aa614cc1ac6bb11d77e14bf, type: 2}
-    weight: 1.5
+  - reward: {fileID: 11400000, guid: 4c9a8e10f0a544a1b6c0f9f5e8a7d321, type: 2}
+    weight: 0.6
     isBomb: 0
   - reward: {fileID: 11400000, guid: ed5b7e26a7d814187b9de8d7744c7725, type: 2}
     weight: 1

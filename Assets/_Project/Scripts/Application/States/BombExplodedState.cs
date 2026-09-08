@@ -13,13 +13,6 @@ namespace Wof.Application
         public override void Enter()
         {
             Ctx.Events.RaisePhaseChanged(GamePhase.BombExploded);
-
-            if (Ctx.Economy.TryConsumeShield())
-            {
-                Fsm.Change(new IdleState(Ctx, Fsm));
-                return;
-            }
-
             Ctx.Events.RaiseBombExploded();
         }
 
@@ -30,6 +23,12 @@ namespace Wof.Application
         }
 
         public void OnReviveAd() => Fsm.Change(new IdleState(Ctx, Fsm)); // ad reward assumed granted
+
+        public void OnReviveShield()
+        {
+            if (Ctx.Economy.TryConsumeShield())
+                Fsm.Change(new IdleState(Ctx, Fsm));
+        }
 
         public void OnGiveUp()
         {

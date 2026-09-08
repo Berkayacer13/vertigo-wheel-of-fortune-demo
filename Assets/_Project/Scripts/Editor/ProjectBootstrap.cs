@@ -193,7 +193,7 @@ namespace Wof.EditorTools
                 (null, 1f, true), // BOMB
                 ("reward_grenade_m26", 1.5f, false),
                 ("reward_points_pistol", 1.5f, false),
-                ("reward_shield", 0.6f, false),
+                ("reward_healthshot_regen", 1.5f, false),
                 ("reward_chest_small", 1f, false),
                 ("reward_skin_tier1_shotgun", 0.5f, false),
             };
@@ -204,7 +204,7 @@ namespace Wof.EditorTools
                 ("reward_chest_silver", 1f, false),
                 ("reward_grenade_m67", 1.5f, false),
                 ("reward_points_rifle", 1.5f, false),
-                ("reward_healthshot_neuro", 1.5f, false),
+                ("reward_shield", 0.6f, false),
                 ("reward_chest_standart", 1f, false),
                 ("reward_skin_tier2_rifle", 0.5f, false),
             };

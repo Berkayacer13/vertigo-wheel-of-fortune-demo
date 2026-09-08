@@ -21,6 +21,7 @@ namespace Wof.Application
     {
         void OnReviveGold();
         void OnReviveAd();
+        void OnReviveShield();
         void OnGiveUp();
     }
 

@@ -1,4 +1,5 @@
 using System;
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,12 +18,16 @@ namespace Wof.Presentation
         [SerializeField] private Button reviveGoldButton;   // ui_button_revive_gold
         [SerializeField] private Button reviveAdButton;     // ui_button_revive_ad
 
-        private Action _onReviveGold, _onReviveAd, _onGiveUp;
+        private Action _onReviveGold, _onReviveAd, _onReviveShield, _onGiveUp;
+        private TMP_Text _recoveryLabel;
+        private RectTransform _bombIcon;
+        private bool _hasShield;
 
-        public void BindInput(Action onReviveGold, Action onReviveAd, Action onGiveUp)
+        public void BindInput(Action onReviveGold, Action onReviveAd, Action onReviveShield, Action onGiveUp)
         {
             _onReviveGold = onReviveGold;
             _onReviveAd = onReviveAd;
+            _onReviveShield = onReviveShield;
             _onGiveUp = onGiveUp;
         }
 
@@ -41,13 +46,46 @@ namespace Wof.Presentation
         }
 
         private void HandleReviveGold() => _onReviveGold?.Invoke();
-        private void HandleReviveAd() => _onReviveAd?.Invoke();
+        private void HandleReviveAd()
+        {
+            if (_hasShield) _onReviveShield?.Invoke();
+            else _onReviveAd?.Invoke();
+        }
         private void HandleGiveUp() => _onGiveUp?.Invoke();
 
-        public void Show(uint reviveCost)
+        public void Show(uint reviveCost, bool hasShield)
         {
+            _hasShield = hasShield;
             if (root != null) root.SetActive(true);
             if (reviveCostValue != null) reviveCostValue.text = reviveCost.ToString();
+
+            if (_bombIcon == null)
+                _bombIcon = transform.FindDeep("ui_image_bomb_icon") as RectTransform;
+            if (_bombIcon != null)
+            {
+                _bombIcon.DOKill();
+                _bombIcon.localScale = Vector3.one;
+                _bombIcon.DOPunchScale(Vector3.one * 0.2f, 0.45f, 8, 0.75f);
+                var image = _bombIcon.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.DOKill();
+                    image.color = Color.white;
+                    image.DOColor(new Color(1f, 0.18f, 0.12f), 0.08f)
+                        .SetLoops(4, LoopType.Yoyo);
+                }
+            }
+
+            if (_recoveryLabel == null && reviveAdButton != null)
+                _recoveryLabel = reviveAdButton.GetComponentInChildren<TMP_Text>(true);
+            if (_recoveryLabel != null) _recoveryLabel.text = hasShield ? "USE SHIELD" : "REVIVE (AD)";
+
+            if (hasShield && reviveAdButton != null)
+            {
+                reviveAdButton.transform.DOKill();
+                reviveAdButton.transform.localScale = Vector3.one;
+                reviveAdButton.transform.DOPunchScale(Vector3.one * 0.12f, 0.55f, 7, 0.7f);
+            }
         }
 
         public void Hide() { if (root != null) root.SetActive(false); }

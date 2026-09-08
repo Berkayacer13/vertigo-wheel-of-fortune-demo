@@ -118,7 +118,7 @@ namespace Wof.Presentation
 
         private void OnBombExploded()
         {
-            bombScreen.Show(_ctx.Settings.reviveGoldCost);
+            bombScreen.Show(_ctx.Settings.reviveGoldCost, _ctx.Economy.ShieldCount > 0);
             Sfx(a => a.PlayBomb());
         }
 
@@ -167,6 +167,7 @@ namespace Wof.Presentation
             bombScreen.BindInput(
                 onReviveGold: () => Press<IReviveInput>(s => s.OnReviveGold()),
                 onReviveAd: () => Press<IReviveInput>(s => s.OnReviveAd()),
+                onReviveShield: () => Press<IReviveInput>(s => s.OnReviveShield()),
                 onGiveUp: () => Press<IReviveInput>(s => s.OnGiveUp()));
             cashOutScreen.BindConfirm(() => Press<ICashOutInput>(s => s.OnConfirm()));
             gameOverScreen.BindRestart(() => Press<IRestartInput>(s => s.OnRestart()));
