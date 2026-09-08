@@ -29,6 +29,7 @@ namespace Wof.Application
 
         public int Zone { get; private set; } = 1;
         public WheelModel CurrentWheel { get; private set; }
+        private readonly Random _shuffleRandom = new Random();
 
         public GameContext(ZoneTuning tuning, GameSettings settings, ISliceSelector selector = null)
         {
@@ -51,6 +52,12 @@ namespace Wof.Application
         }
 
         public void NextZone() => SetZone(Zone + 1);
+
+        public void ShuffleCurrentWheel()
+        {
+            CurrentWheel = CurrentWheel.Shuffled(_shuffleRandom);
+            Events.RaiseWheelBuilt(CurrentWheel);
+        }
 
         public void ResetRun()
         {

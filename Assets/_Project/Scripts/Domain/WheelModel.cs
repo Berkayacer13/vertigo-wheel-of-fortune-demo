@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Wof.Domain
@@ -22,6 +23,20 @@ namespace Wof.Domain
         public float SliceAngle => 360f / SliceCount;
 
         public WheelSlice SliceAt(int index) => Slices[index];
+
+        public WheelModel Shuffled(Random random)
+        {
+            var shuffled = new List<WheelSlice>(Slices);
+            for (int i = shuffled.Count - 1; i > 0; i--)
+            {
+                int swapIndex = random.Next(i + 1);
+                var slice = shuffled[i];
+                shuffled[i] = shuffled[swapIndex];
+                shuffled[swapIndex] = slice;
+            }
+
+            return new WheelModel(Tier, shuffled);
+        }
 
         /// <summary>Per-slice weights, ready to hand to an <see cref="ISliceSelector"/>.</summary>
         public IReadOnlyList<float> Weights()

@@ -15,6 +15,8 @@ namespace Wof.Application
         {
             Ctx.Events.RaisePhaseChanged(GamePhase.Spinning);
 
+            Ctx.ShuffleCurrentWheel();
+
             // 1) Decide the result first (deterministic, unit-tested).
             int index = Ctx.Selector.PickLandingIndex(Ctx.CurrentWheel.Weights());
 
