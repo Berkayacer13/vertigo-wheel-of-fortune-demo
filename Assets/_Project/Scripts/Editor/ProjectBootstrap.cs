@@ -127,7 +127,6 @@ namespace Wof.EditorTools
             new RewardSpec("reward_gold", RewardKind.Gold, "Gold", "UI_icon_gold", 100, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_cash", RewardKind.Cash, "Cash", "UI_icon_cash", 5, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_grenade_m26", RewardKind.Consumable, "M26 Grenade", "ui_icon_render_cons_grenade_m26", 2, RarityTier.Tier1, WinVfx.Star),
-            new RewardSpec("reward_healthshot_regen", RewardKind.Consumable, "Regenerator", "ui_icon_render_cons_healthshot_2_regenerator", 1, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_shield", RewardKind.Shield, "Shield", "UI_Icons_Armor_Points", 1, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_points_pistol", RewardKind.Points, "Pistol Points", "UI_Icons_Pistol_Points", 80, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_chest_small", RewardKind.Chest, "Small Chest", "UI_icon_chest_small_noligt", 1, RarityTier.Tier1, WinVfx.Star),
@@ -194,7 +193,6 @@ namespace Wof.EditorTools
                 (null, 1f, true), // BOMB
                 ("reward_grenade_m26", 1.5f, false),
                 ("reward_points_pistol", 1.5f, false),
-                ("reward_healthshot_regen", 1.5f, false),
                 ("reward_shield", 0.6f, false),
                 ("reward_chest_small", 1f, false),
                 ("reward_skin_tier1_shotgun", 0.5f, false),
@@ -470,9 +468,9 @@ namespace Wof.EditorTools
 
             var zoneTrack = BuildZoneTrack(hud);
 
-            var runText = AddText("ui_text_runcount_value", hud, "0", 38, TextAlignmentOptions.MidlineRight);
+            var runText = AddText("ui_text_runcount_value", hud, "STACKS: 0", 30, TextAlignmentOptions.MidlineRight);
             runText.rectTransform.pivot = new Vector2(1, 0.5f); // rect ends AT x, no off-screen spill
-            Place(runText.rectTransform, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-40, 0), new Vector2(160, 64));
+            Place(runText.rectTransform, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-335, 0), new Vector2(220, 64));
 
             // inventory (run stash) button — chest icon on a small grey button
             var invBtn = AddButton("ui_button_inventory", hud, "", 1, LoadIcon("UI_button_grey_standard"));
