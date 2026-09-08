@@ -74,6 +74,17 @@ namespace Wof.Tests
         }
 
         [Test]
+        public void Bank_does_not_make_shield_permanent()
+        {
+            var eco = NewEconomy();
+            eco.AddRunReward(new Reward("shield", RewardKind.Shield, 1u, "UI_Icons_Armor_Points"));
+
+            eco.Bank();
+
+            Assert.AreEqual(0, eco.PermanentInventory.Count);
+        }
+
+        [Test]
         public void Bomb_wipe_loses_wallet_but_keeps_balances()
         {
             var eco = NewEconomy(gold: 100);
@@ -93,6 +104,19 @@ namespace Wof.Tests
             Assert.AreEqual(5, eco.Gold);
             Assert.IsFalse(eco.TrySpendGold(25), "cannot afford a second revive");
             Assert.AreEqual(5, eco.Gold);
+        }
+
+        [Test]
+        public void Shield_is_consumed_without_wiping_the_run()
+        {
+            var eco = NewEconomy();
+            eco.AddRunReward(new Reward("shield", RewardKind.Shield, 1u, "UI_Icons_Armor_Points"));
+            eco.AddRunReward(Gold(250));
+
+            Assert.IsTrue(eco.TryConsumeShield());
+            Assert.AreEqual(0, eco.ShieldCount);
+            Assert.AreEqual(1, eco.Wallet.RunRewards.Count);
+            Assert.IsFalse(eco.TryConsumeShield());
         }
 
         [Test]

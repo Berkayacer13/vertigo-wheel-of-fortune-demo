@@ -128,6 +128,7 @@ namespace Wof.EditorTools
             new RewardSpec("reward_cash", RewardKind.Cash, "Cash", "UI_icon_cash", 5, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_grenade_m26", RewardKind.Consumable, "M26 Grenade", "ui_icon_render_cons_grenade_m26", 2, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_healthshot_regen", RewardKind.Consumable, "Regenerator", "ui_icon_render_cons_healthshot_2_regenerator", 1, RarityTier.Tier1, WinVfx.Star),
+            new RewardSpec("reward_shield", RewardKind.Shield, "Shield", "UI_Icons_Armor_Points", 1, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_points_pistol", RewardKind.Points, "Pistol Points", "UI_Icons_Pistol_Points", 80, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_chest_small", RewardKind.Chest, "Small Chest", "UI_icon_chest_small_noligt", 1, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_skin_tier1_shotgun", RewardKind.WeaponSkin, "Shotgun Skin", "UI_Icon_Renders_tier1_shotgun", 1, RarityTier.Tier1, WinVfx.Star),
@@ -194,6 +195,7 @@ namespace Wof.EditorTools
                 ("reward_grenade_m26", 1.5f, false),
                 ("reward_points_pistol", 1.5f, false),
                 ("reward_healthshot_regen", 1.5f, false),
+                ("reward_shield", 0.6f, false),
                 ("reward_chest_small", 1f, false),
                 ("reward_skin_tier1_shotgun", 0.5f, false),
             };

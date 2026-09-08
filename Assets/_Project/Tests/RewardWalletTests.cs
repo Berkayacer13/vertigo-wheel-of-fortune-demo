@@ -38,5 +38,18 @@ namespace Wof.Tests
             Assert.AreEqual(2, banked.Count);
             Assert.IsFalse(w.HasRewards, "wallet should be empty after cashing out");
         }
+
+        [Test]
+        public void Consume_removes_only_the_requested_reward()
+        {
+            var w = new RewardWallet();
+            w.Add(new Reward("shield", RewardKind.Shield, 1u, "UI_Icons_Armor_Points"));
+            w.Add(Gold(10u));
+
+            Assert.IsTrue(w.TryConsume(RewardKind.Shield));
+            Assert.AreEqual(1, w.RunRewards.Count);
+            Assert.AreEqual(RewardKind.Gold, w.RunRewards[0].Kind);
+            Assert.IsFalse(w.TryConsume(RewardKind.Shield));
+        }
     }
 }
