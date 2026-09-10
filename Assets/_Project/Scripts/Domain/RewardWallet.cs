@@ -20,17 +20,25 @@ namespace Wof.Domain
         /// <summary>(R8) Bomb: lose everything collected this run.</summary>
         public void DetonateBomb() => _runRewards.Clear();
 
-        public bool TryConsume(RewardKind kind)
+        /// <summary>
+        /// Removes the first reward of <paramref name="kind"/> and hands it back, so the
+        /// caller can report the reward's real Id instead of guessing a content string.
+        /// </summary>
+        public bool TryConsume(RewardKind kind, out Reward consumed)
         {
             for (int i = 0; i < _runRewards.Count; i++)
             {
                 if (_runRewards[i].Kind != kind) continue;
+                consumed = _runRewards[i];
                 _runRewards.RemoveAt(i);
                 return true;
             }
 
+            consumed = default;
             return false;
         }
+
+        public bool TryConsume(RewardKind kind) => TryConsume(kind, out _);
 
         /// <summary>
         /// (R10) Returns the banked rewards and clears the run. The caller is

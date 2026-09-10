@@ -16,13 +16,18 @@ namespace Wof.Application
         public uint Cash { get; private set; }
         public RewardWallet Wallet => _wallet;
         public PermanentRewardInventory PermanentInventory { get; } = new PermanentRewardInventory();
+        /// <summary>
+        /// How many bombs the player can currently survive. Counts wallet ENTRIES, not
+        /// amounts, because <see cref="TryConsumeShield"/> removes one entry per revive —
+        /// counting amounts would promise more revives than the wallet can actually pay.
+        /// </summary>
         public int ShieldCount
         {
             get
             {
                 int count = 0;
                 foreach (var reward in _wallet.RunRewards)
-                    if (reward.Kind == RewardKind.Shield) count += (int)reward.Amount;
+                    if (reward.Kind == RewardKind.Shield) count++;
                 return count;
             }
         }
@@ -74,15 +79,15 @@ namespace Wof.Application
             return true;
         }
 
+        /// <summary>Spend one shield to survive a bomb. The run wallet is otherwise untouched.</summary>
         public bool TryConsumeShield()
         {
-            bool consumed = _wallet.TryConsume(RewardKind.Shield);
-            if (consumed)
-            {
-                _events.RaiseRewardConsumed("reward_shield");
-                _events.RaiseWalletChanged(_wallet.RunRewards.Count);
-            }
-            return consumed;
+            if (!_wallet.TryConsume(RewardKind.Shield, out var shield)) return false;
+
+            // report the reward's own Id, so renaming the asset can never desync the HUD
+            _events.RaiseRewardConsumed(shield.Id);
+            _events.RaiseWalletChanged(_wallet.RunRewards.Count);
+            return true;
         }
 
         public void AddGold(uint amount)

@@ -21,7 +21,7 @@ namespace Wof.Application
     {
         void OnReviveGold();
         void OnReviveAd();
-        void OnReviveShield();
+        bool OnReviveShield();   // false when no shield was available to spend
         void OnGiveUp();
     }
 

@@ -24,10 +24,15 @@ namespace Wof.Application
 
         public void OnReviveAd() => Fsm.Change(new IdleState(Ctx, Fsm)); // ad reward assumed granted
 
-        public void OnReviveShield()
+        /// <summary>
+        /// Spend a shield instead of gold or an ad. Returns false to the View when the
+        /// wallet holds none, so the button can fall back rather than dying silently.
+        /// </summary>
+        public bool OnReviveShield()
         {
-            if (Ctx.Economy.TryConsumeShield())
-                Fsm.Change(new IdleState(Ctx, Fsm));
+            if (!Ctx.Economy.TryConsumeShield()) return false;
+            Fsm.Change(new IdleState(Ctx, Fsm)); // rewards kept, minus the shield
+            return true;
         }
 
         public void OnGiveUp()

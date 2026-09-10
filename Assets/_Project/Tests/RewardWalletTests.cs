@@ -40,6 +40,31 @@ namespace Wof.Tests
         }
 
         [Test]
+        public void Consume_hands_back_the_reward_it_removed()
+        {
+            // the caller needs the reward itself to announce its real id, so the out
+            // overload must return the entry it took, not just say that it took one
+            var w = new RewardWallet();
+            w.Add(Gold(10u));
+            w.Add(new Reward("reward_shield_prototype", RewardKind.Shield, 1u, "UI_Icons_Armor_Points"));
+
+            Assert.IsTrue(w.TryConsume(RewardKind.Shield, out var consumed));
+            Assert.AreEqual("reward_shield_prototype", consumed.Id);
+            Assert.AreEqual(RewardKind.Shield, consumed.Kind);
+        }
+
+        [Test]
+        public void Consume_reports_failure_without_a_reward()
+        {
+            var w = new RewardWallet();
+            w.Add(Gold(10u));
+
+            Assert.IsFalse(w.TryConsume(RewardKind.Shield, out var consumed));
+            Assert.IsNull(consumed.Id, "nothing was removed, so there is no reward to report");
+            Assert.AreEqual(1, w.RunRewards.Count);
+        }
+
+        [Test]
         public void Consume_removes_only_the_requested_reward()
         {
             var w = new RewardWallet();

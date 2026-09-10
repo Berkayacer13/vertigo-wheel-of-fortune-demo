@@ -13,6 +13,12 @@ namespace Wof.Tests
         private static EconomyService NewEconomy(uint gold = 100, uint cash = 0)
             => new EconomyService(new GameEvents(), gold, cash);
 
+        private static EconomyService NewEconomy(GameEvents events, uint gold = 100, uint cash = 0)
+            => new EconomyService(events, gold, cash);
+
+        private static Reward Shield(string id = "reward_shield")
+            => new Reward(id, RewardKind.Shield, 1u, "UI_Icons_Armor_Points");
+
         private static Reward Gold(uint amount) => new Reward("gold", RewardKind.Gold, amount, "UI_icon_gold");
         private static Reward Cash(uint amount) => new Reward("cash", RewardKind.Cash, amount, "UI_icon_cash");
         private static Reward Skin() => new Reward("skin", RewardKind.WeaponSkin, 1, "skin");
@@ -126,6 +132,51 @@ namespace Wof.Tests
             eco.AddGold(uint.MaxValue - eco.Gold);
 
             Assert.Throws<System.OverflowException>(() => eco.AddGold(1));
+        }
+
+        [Test]
+        public void Consuming_a_shield_announces_the_rewards_real_id()
+        {
+            // the HUD removes the cell by id, so the event must carry the reward's own id
+            // rather than a hard-coded content string that renaming the asset would break
+            var events = new GameEvents();
+            string announced = null;
+            events.RewardConsumed += id => announced = id;
+
+            var eco = NewEconomy(events);
+            eco.AddRunReward(Shield("reward_shield_prototype"));
+
+            Assert.IsTrue(eco.TryConsumeShield());
+            Assert.AreEqual("reward_shield_prototype", announced);
+        }
+
+        [Test]
+        public void Shield_count_matches_the_number_of_revives_actually_available()
+        {
+            // one wallet entry = one revive, whatever Amount the designer put on the asset:
+            // TryConsumeShield removes the entry, so counting amounts would over-promise
+            var eco = NewEconomy();
+            eco.AddRunReward(new Reward("shield", RewardKind.Shield, 3u, "UI_Icons_Armor_Points"));
+
+            Assert.AreEqual(1, eco.ShieldCount);
+            Assert.IsTrue(eco.TryConsumeShield());
+            Assert.AreEqual(0, eco.ShieldCount);
+            Assert.IsFalse(eco.TryConsumeShield(), "an Amount of 3 must not buy three revives");
+        }
+
+        [Test]
+        public void Two_shields_survive_two_bombs()
+        {
+            var eco = NewEconomy();
+            eco.AddRunReward(Shield());
+            eco.AddRunReward(Shield());
+            eco.AddRunReward(Gold(250));
+
+            Assert.AreEqual(2, eco.ShieldCount);
+            Assert.IsTrue(eco.TryConsumeShield());
+            Assert.IsTrue(eco.TryConsumeShield());
+            Assert.IsFalse(eco.TryConsumeShield());
+            Assert.AreEqual(1, eco.Wallet.RunRewards.Count, "the gold reward is untouched by revives");
         }
 
     }

@@ -118,7 +118,7 @@ namespace Wof.Presentation
 
         private void OnBombExploded()
         {
-            bombScreen.Show(_ctx.Settings.reviveGoldCost, _ctx.Economy.ShieldCount > 0);
+            bombScreen.Show(_ctx.Settings.reviveGoldCost, _ctx.Economy.ShieldCount);
             Sfx(a => a.PlayBomb());
         }
 
@@ -167,7 +167,7 @@ namespace Wof.Presentation
             bombScreen.BindInput(
                 onReviveGold: () => Press<IReviveInput>(s => s.OnReviveGold()),
                 onReviveAd: () => Press<IReviveInput>(s => s.OnReviveAd()),
-                onReviveShield: () => Press<IReviveInput>(s => s.OnReviveShield()),
+                onReviveShield: () => PressAndGet<IReviveInput>(s => s.OnReviveShield()),
                 onGiveUp: () => Press<IReviveInput>(s => s.OnGiveUp()));
             cashOutScreen.BindConfirm(() => Press<ICashOutInput>(s => s.OnConfirm()));
             gameOverScreen.BindRestart(() => Press<IRestartInput>(s => s.OnRestart()));
@@ -183,6 +183,16 @@ namespace Wof.Presentation
         {
             Sfx(a => a.PlayClick());
             Forward(action);
+        }
+
+        /// <summary>
+        /// Same as <see cref="Press{T}"/> but hands the state's answer back to the View, for
+        /// inputs the View must react to. False when no active state accepts the input.
+        /// </summary>
+        private bool PressAndGet<T>(System.Func<T, bool> action) where T : class
+        {
+            Sfx(a => a.PlayClick());
+            return _fsm.Current is T input && action(input);
         }
 
         /// <summary>Routes a player input to the active state only if it accepts that input.</summary>
