@@ -18,6 +18,11 @@ namespace Wof.Application
             Ctx.Events.RaisePhaseChanged(GamePhase.Resolving);
             var slice = Ctx.CurrentWheel.SliceAt(_index);
 
+            // Re-order the chambers for the next spin now, while the reward popup / bomb
+            // screen is about to cover the wheel. Doing it at spin time would visibly
+            // swap the slice icons under the player's finger.
+            Ctx.ShuffleCurrentWheel();
+
             if (slice.IsBomb)
             {
                 Fsm.Change(new BombExplodedState(Ctx, Fsm));
