@@ -81,10 +81,15 @@ namespace Wof.Presentation
             float jitter = UnityEngine.Random.Range(-sliceAngle * 0.25f, sliceAngle * 0.25f); // off dead-center
             float targetZ = settings.fullRotations * 360f + land + jitter;
 
+            rotor.DOKill();
             rotor.localRotation = Quaternion.identity;
             rotor.DOLocalRotate(new Vector3(0f, 0f, targetZ), settings.spinDuration, RotateMode.FastBeyond360)
                  .SetEase(settings.spinEase)
-                 .OnComplete(() => tcs.TrySetResult(true));
+                 .SetLink(gameObject)
+                 .OnComplete(() => tcs.TrySetResult(true))
+                 // a killed tween (scene unload, DOKill, disable) must still release the
+                 // awaiting state, or the FSM sits in Spinning forever with SPIN disabled
+                 .OnKill(() => tcs.TrySetResult(false));
 
             return tcs.Task;
         }
