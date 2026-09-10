@@ -86,14 +86,12 @@ namespace Wof.Presentation
             // bank the just-won silver/golden reward and walk away without re-entering risk
             rewardPopup.Show(reward, _canLeaveCurrentZone);
             inventoryView.AddItem(reward);
-            hudView.SetRunCount(inventoryView.ItemCount);
             Sfx(a => a.PlayWin());
         }
 
         private void OnRewardConsumed(string rewardId)
         {
             inventoryView.RemoveItem(rewardId);
-            hudView.SetRunCount(inventoryView.ItemCount);
         }
 
         private void OnRewardsBanked(System.Collections.Generic.IReadOnlyList<Reward> banked)
@@ -105,7 +103,10 @@ namespace Wof.Presentation
         private void OnWalletChanged(int runCount)
         {
             if (runCount == 0) inventoryView.Clear(); // cash-out or bomb give-up
-            hudView.SetRunCount(inventoryView.ItemCount);
+            // drive the HUD from the wallet, not from the inventory grid: the grid merges
+            // repeat wins into one cell, so counting its cells froze the readout at 1
+            // while the player kept stacking rewards they could lose
+            hudView.SetRunCount(runCount);
         }
 
         private void OnZoneChanged(int zone, ZoneType type)

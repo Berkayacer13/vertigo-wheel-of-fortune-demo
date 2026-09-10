@@ -468,7 +468,7 @@ namespace Wof.EditorTools
 
             var zoneTrack = BuildZoneTrack(hud);
 
-            var runText = AddText("ui_text_runcount_value", hud, "STACKS: 0", 30, TextAlignmentOptions.MidlineRight);
+            var runText = AddText("ui_text_runcount_value", hud, "AT RISK: 0", 30, TextAlignmentOptions.MidlineRight);
             runText.rectTransform.pivot = new Vector2(1, 0.5f); // rect ends AT x, no off-screen spill
             Place(runText.rectTransform, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-335, 0), new Vector2(220, 64));
 

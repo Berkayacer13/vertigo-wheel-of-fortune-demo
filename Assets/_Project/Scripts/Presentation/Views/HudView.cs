@@ -29,9 +29,10 @@ namespace Wof.Presentation
             if (cashValue != null) cashValue.text = cash.ToString();
         }
 
+        /// <summary>How many rewards the next bomb would take — the run's stake.</summary>
         public void SetRunCount(int count)
         {
-            if (runCountValue != null) runCountValue.text = $"STACKS: {count}";
+            if (runCountValue != null) runCountValue.text = $"AT RISK: {count}";
         }
 
         public void SetZone(int zone, ZoneType type)
