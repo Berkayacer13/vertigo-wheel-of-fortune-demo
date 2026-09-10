@@ -193,7 +193,7 @@ namespace Wof.EditorTools
                 (null, 1f, true), // BOMB
                 ("reward_grenade_m26", 1.5f, false),
                 ("reward_points_pistol", 1.5f, false),
-                ("reward_healthshot_regen", 1.5f, false),
+                ("reward_shield", 0.8f, false),   // the bomb lives on this wheel, so the shield is earnable here
                 ("reward_chest_small", 1f, false),
                 ("reward_skin_tier1_shotgun", 0.5f, false),
             };
@@ -249,8 +249,12 @@ namespace Wof.EditorTools
             for (int i = 0; i < entries.Length; i++)
             {
                 var el = list.GetArrayElementAtIndex(i);
-                el.FindPropertyRelative("reward").objectReferenceValue =
-                    entries[i].reward != null ? rewards[entries[i].reward] : null;
+                RewardDefinition def = null;
+                if (entries[i].reward != null && !rewards.TryGetValue(entries[i].reward, out def))
+                    throw new System.InvalidOperationException(
+                        $"[{file}] slice {i} references '{entries[i].reward}', which is not in RewardSpecs. " +
+                        "Add it to RewardSpecs or point the slice at an existing reward.");
+                el.FindPropertyRelative("reward").objectReferenceValue = def;
                 el.FindPropertyRelative("weight").floatValue = entries[i].weight;
                 el.FindPropertyRelative("isBomb").boolValue = entries[i].bomb;
             }
