@@ -14,7 +14,9 @@ namespace Wof.Domain
         {
             if (_rewards.TryGetValue(reward.Id, out var existing))
             {
-                _rewards[reward.Id] = existing.WithAmount(existing.Amount + reward.Amount);
+                // checked, to match EconomyService's currency arithmetic: a stack that
+                // silently wrapped to zero would delete loot the player already earned
+                _rewards[reward.Id] = existing.WithAmount(checked(existing.Amount + reward.Amount));
                 return;
             }
 

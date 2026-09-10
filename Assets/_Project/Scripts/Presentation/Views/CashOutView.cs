@@ -27,14 +27,17 @@ namespace Wof.Presentation
             if (root != null) root.SetActive(true);
             if (summaryValue == null) return;
 
-            // currencies go straight to the balances; everything else is "items"
+            // currencies go straight to the balances; everything else is "items".
+            // Shields are run-scoped and bombs are never banked, so neither is counted —
+            // this must mirror EconomyService.Bank or the summary promises loot the
+            // player does not actually keep.
             uint gold = 0, cash = 0;
             int items = 0;
             foreach (var r in banked)
             {
                 if (r.Kind == RewardKind.Gold) gold += r.Amount;
                 else if (r.Kind == RewardKind.Cash) cash += r.Amount;
-                else items++;
+                else if (r.Kind != RewardKind.Bomb && r.Kind != RewardKind.Shield) items++;
             }
             summaryValue.text =
                 $"YOU WALKED AWAY!\n\n+{gold} Gold   +{cash} Cash\n{items} item(s) collected";

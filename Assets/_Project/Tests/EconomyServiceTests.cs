@@ -179,5 +179,42 @@ namespace Wof.Tests
             Assert.AreEqual(1, eco.Wallet.RunRewards.Count, "the gold reward is untouched by revives");
         }
 
+        [Test]
+        public void Bank_keeps_the_run_intact_when_the_gold_balance_would_overflow()
+        {
+            // Bank must total up before it mutates. The old order emptied the wallet first
+            // and credited inside the loop, so an overflow threw with the run already gone.
+            var eco = NewEconomy(gold: uint.MaxValue);
+            eco.AddRunReward(Gold(1));
+            eco.AddRunReward(Skin());
+
+            Assert.Throws<System.OverflowException>(() => eco.Bank());
+
+            Assert.AreEqual(uint.MaxValue, eco.Gold, "balance must not move");
+            Assert.AreEqual(2, eco.Wallet.RunRewards.Count, "the run must survive a failed bank");
+            Assert.AreEqual(0, eco.PermanentInventory.Count, "nothing may be banked part-way");
+        }
+
+        [Test]
+        public void Bank_credits_currency_and_announces_the_new_balances()
+        {
+            var events = new GameEvents();
+            uint seenGold = 0, seenCash = 0;
+            int raised = 0;
+            events.CurrencyChanged += (g, c) => { seenGold = g; seenCash = c; raised++; };
+
+            var eco = NewEconomy(events, gold: 100, cash: 5);
+            eco.AddRunReward(Gold(250));
+            eco.AddRunReward(Cash(15));
+
+            eco.Bank();
+
+            Assert.AreEqual(350, eco.Gold);
+            Assert.AreEqual(20, eco.Cash);
+            Assert.AreEqual(1, raised, "one event for the whole cash-out, not one per reward");
+            Assert.AreEqual(350u, seenGold);
+            Assert.AreEqual(20u, seenCash);
+        }
+
     }
 }

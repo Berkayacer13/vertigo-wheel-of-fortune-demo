@@ -58,14 +58,31 @@ namespace Wof.Application
         /// </summary>
         public IReadOnlyList<Reward> Bank()
         {
+            // Total everything up BEFORE emptying the wallet. The old order cashed the
+            // wallet out first and credited inside the loop, so an overflow part-way
+            // through threw with the wallet already cleared — the player lost the whole
+            // run at the moment they tried to bank it. Nothing mutates until the
+            // arithmetic below has proven it fits.
+            uint goldGain = 0, cashGain = 0;
+            foreach (var r in _wallet.RunRewards)
+            {
+                if (r.Kind == RewardKind.Gold) goldGain = checked(goldGain + r.Amount);
+                else if (r.Kind == RewardKind.Cash) cashGain = checked(cashGain + r.Amount);
+            }
+            uint newGold = checked(Gold + goldGain);
+            uint newCash = checked(Cash + cashGain);
+
             var banked = _wallet.CashOut();
             foreach (var r in banked)
             {
-                if (r.Kind == RewardKind.Gold) AddGold(r.Amount);
-                else if (r.Kind == RewardKind.Cash) AddCash(r.Amount);
-                else if (r.Kind != RewardKind.Bomb && r.Kind != RewardKind.Shield)
-                    PermanentInventory.Add(r);
+                if (r.Kind == RewardKind.Gold || r.Kind == RewardKind.Cash) continue;
+                if (r.Kind == RewardKind.Bomb || r.Kind == RewardKind.Shield) continue;
+                PermanentInventory.Add(r);
             }
+
+            Gold = newGold;
+            Cash = newCash;
+            _events.RaiseCurrencyChanged(Gold, Cash);
             _events.RaiseWalletChanged(0);
             return banked;
         }
