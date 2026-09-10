@@ -49,7 +49,14 @@ namespace Wof.Presentation
                 iconValue.sprite = sprites != null ? sprites.Resolve(reward.IconKey) : null;
                 iconValue.preserveAspect = true;
             }
-            if (amountValue != null) amountValue.text = $"x{reward.Amount}";
+            // Name the reward. Icon + "x1" alone made the Shield indistinguishable from a
+            // Points badge, so players only discovered what it did after a bomb killed them.
+            if (amountValue != null)
+            {
+                amountValue.text = reward.Kind == RewardKind.Shield
+                    ? $"{reward.DisplayName}\n<size=60%>SURVIVES ONE BOMB</size>"
+                    : $"{reward.DisplayName}  x{reward.Amount}";
+            }
 
             if (leaveButton != null) leaveButton.gameObject.SetActive(canLeave);
             if (_collectLabel == null && collectButton != null)

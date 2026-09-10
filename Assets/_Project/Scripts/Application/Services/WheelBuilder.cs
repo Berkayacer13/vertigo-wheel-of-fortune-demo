@@ -29,7 +29,7 @@ namespace Wof.Application
             foreach (var e in cfg.Slices)
             {
                 Reward r = e.isBomb
-                    ? new Reward("bomb", RewardKind.Bomb, 0, "ui_card_icon_death")
+                    ? new Reward("bomb", RewardKind.Bomb, 0, "ui_card_icon_death", "Bomb")
                     : e.reward.ToReward(e.reward.BaseAmount);
                 slices.Add(new WheelSlice(r, e.weight));
             }

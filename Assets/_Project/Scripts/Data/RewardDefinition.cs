@@ -30,6 +30,7 @@ namespace Wof.Data
         /// Bridge SO -> pure Domain struct. IconKey is the asset name so a View can
         /// resolve the Sprite via an atlas/registry without the Domain knowing about UI.
         /// </summary>
-        public Reward ToReward(uint amount) => new Reward(Id, Kind, amount, icon ? icon.name : Id);
+        public Reward ToReward(uint amount) =>
+            new Reward(Id, Kind, amount, icon ? icon.name : Id, displayName);
     }
 }

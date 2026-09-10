@@ -13,17 +13,25 @@ namespace Wof.Domain
         /// <summary>Sprite lookup key (asset name), not a Sprite — keeps the Domain UI-free.</summary>
         public readonly string IconKey;
 
-        public Reward(string id, RewardKind kind, uint amount, string iconKey)
+        /// <summary>
+        /// Human-readable name for the popup/inventory. Plain text rather than a
+        /// localisation handle, matching the rest of this demo's UI strings. Falls back
+        /// to the Id so a reward is never nameless on screen.
+        /// </summary>
+        public readonly string DisplayName;
+
+        public Reward(string id, RewardKind kind, uint amount, string iconKey, string displayName = null)
         {
             Id = id;
             Kind = kind;
             Amount = amount;
             IconKey = iconKey;
+            DisplayName = string.IsNullOrEmpty(displayName) ? id : displayName;
         }
 
         public bool IsBomb => Kind == RewardKind.Bomb;
 
         /// <summary>Returns a copy with a new amount (used by the reward scaler).</summary>
-        public Reward WithAmount(uint amount) => new Reward(Id, Kind, amount, IconKey);
+        public Reward WithAmount(uint amount) => new Reward(Id, Kind, amount, IconKey, DisplayName);
     }
 }
