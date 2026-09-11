@@ -30,11 +30,23 @@ namespace Wof.Presentation
 
         private void Apply()
         {
+            int w = Screen.width, h = Screen.height;
+            if (w <= 0 || h <= 0) return;   // nothing sane to normalise against yet
+
             var safe = Screen.safeArea;
             Vector2 min = safe.position;
             Vector2 max = safe.position + safe.size;
-            min.x /= Screen.width; min.y /= Screen.height;
-            max.x /= Screen.width; max.y /= Screen.height;
+            min.x /= w; min.y /= h;
+            max.x /= w; max.y /= h;
+
+            // Clamp: safeArea and Screen.width/height are read from two different places and
+            // can disagree for a frame after a resolution change — in the editor a Game-view
+            // resize does exactly that. Un-clamped, the division then yields anchors past 1
+            // and the whole UI is laid out for a screen that does not exist, which is how a
+            // capture came out zoomed and shoved into the bottom-right corner.
+            min.x = Mathf.Clamp01(min.x); min.y = Mathf.Clamp01(min.y);
+            max.x = Mathf.Clamp01(max.x); max.y = Mathf.Clamp01(max.y);
+            if (max.x <= min.x || max.y <= min.y) return;   // degenerate — keep the last good one
 
             _rect.anchorMin = min;
             _rect.anchorMax = max;
