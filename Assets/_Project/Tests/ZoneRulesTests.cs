@@ -38,5 +38,31 @@ namespace Wof.Tests
             Assert.AreEqual(ZoneType.Safe, ZoneRules.Resolve(3, safeInterval: 3, superInterval: 12));
             Assert.AreEqual(ZoneType.Super, ZoneRules.Resolve(12, safeInterval: 3, superInterval: 12));
         }
+
+        [TestCase(1, 4)]
+        [TestCase(4, 1)]
+        [TestCase(5, 0)]    // already safe — nothing to wait for
+        [TestCase(6, 4)]
+        [TestCase(29, 1)]
+        [TestCase(30, 0)]   // already super
+        [TestCase(31, 4)]
+        public void Counts_zones_until_the_player_may_leave(int zone, int expected)
+            => Assert.AreEqual(expected, ZoneRules.ZonesUntilLeave(zone));
+
+        [Test]
+        public void Countdown_reaches_zero_exactly_when_leaving_is_allowed()
+        {
+            for (int zone = 1; zone <= 120; zone++)
+                Assert.AreEqual(ZoneRules.CanLeave(zone), ZoneRules.ZonesUntilLeave(zone) == 0,
+                    $"countdown disagrees with CanLeave at zone {zone}");
+        }
+
+        [Test]
+        public void Countdown_takes_whichever_milestone_lands_first()
+        {
+            // super (7) is not a multiple of safe (4), so zone 5 must count to 7, not 8
+            Assert.AreEqual(2, ZoneRules.ZonesUntilLeave(5, safe: 4, super: 7));
+            Assert.AreEqual(1, ZoneRules.ZonesUntilLeave(3, safe: 4, super: 7));
+        }
     }
 }

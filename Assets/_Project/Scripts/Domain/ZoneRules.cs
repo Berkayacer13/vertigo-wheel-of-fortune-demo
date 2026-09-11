@@ -30,6 +30,28 @@ namespace Wof.Domain
             int safe = DefaultSafeInterval, int super = DefaultSuperInterval)
             => Resolve(zone, safe, super) != ZoneType.Normal;
 
+        /// <summary>
+        /// How many more zones the player must clear before walking away is allowed;
+        /// 0 when the current zone already allows it. The UI uses this to say *why* the
+        /// LEAVE button is dark ("SAFE ZONE IN 3") instead of just greying it out — the
+        /// every-5th rule is invisible to a first-time player otherwise.
+        /// </summary>
+        public static int ZonesUntilLeave(int zone,
+            int safe = DefaultSafeInterval, int super = DefaultSuperInterval)
+        {
+            int from = zone > 0 ? zone : 0;
+            if (from > 0 && CanLeave(from, safe, super)) return 0;
+
+            // Super is not always a multiple of Safe once a designer retunes the intervals,
+            // so take whichever milestone lands first rather than assuming it is Safe.
+            int next = System.Math.Min(NextMultipleAfter(from, safe), NextMultipleAfter(from, super));
+            return next == int.MaxValue ? 0 : next - from;
+        }
+
+        /// <summary>Smallest multiple of <paramref name="interval"/> strictly above <paramref name="value"/>.</summary>
+        private static int NextMultipleAfter(int value, int interval)
+            => interval <= 0 ? int.MaxValue : (value / interval + 1) * interval;
+
         public static WheelTier TierFor(ZoneType type) => type switch
         {
             ZoneType.Super => WheelTier.Golden,
