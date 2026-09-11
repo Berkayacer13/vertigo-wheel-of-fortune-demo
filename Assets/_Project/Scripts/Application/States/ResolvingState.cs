@@ -18,10 +18,11 @@ namespace Wof.Application
             Ctx.Events.RaisePhaseChanged(GamePhase.Resolving);
             var slice = Ctx.CurrentWheel.SliceAt(_index);
 
-            // Re-order the chambers for the next spin now, while the reward popup / bomb
-            // screen is about to cover the wheel. Doing it at spin time would visibly
-            // swap the slice icons under the player's finger.
-            Ctx.ShuffleCurrentWheel();
+            // NOTE: the chambers are deliberately NOT re-ordered here. Every reward path
+            // ends in ZoneIntro, which builds and shuffles a fresh wheel anyway, and the
+            // views now hold the wheel uncovered for a beat so the player can see what it
+            // landed on — re-ordering at this instant would swap the icons in front of them.
+            // The one path that re-spins the same wheel (bomb -> revive) shuffles itself.
 
             if (slice.IsBomb)
             {

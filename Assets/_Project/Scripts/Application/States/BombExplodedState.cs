@@ -18,11 +18,11 @@ namespace Wof.Application
 
         public void OnReviveGold()
         {
-            if (Ctx.Economy.TrySpendGold(Ctx.Settings.reviveGoldCost))
-                Fsm.Change(new IdleState(Ctx, Fsm)); // rewards kept (R9)
+            if (!Ctx.Economy.TrySpendGold(Ctx.Settings.reviveGoldCost)) return;
+            Resume(); // rewards kept (R9)
         }
 
-        public void OnReviveAd() => Fsm.Change(new IdleState(Ctx, Fsm)); // ad reward assumed granted
+        public void OnReviveAd() => Resume(); // ad reward assumed granted
 
         /// <summary>
         /// Spend a shield instead of gold or an ad. Returns false to the View when the
@@ -31,8 +31,20 @@ namespace Wof.Application
         public bool OnReviveShield()
         {
             if (!Ctx.Economy.TryConsumeShield()) return false;
-            Fsm.Change(new IdleState(Ctx, Fsm)); // rewards kept, minus the shield
+            Resume(); // rewards kept, minus the shield
             return true;
+        }
+
+        /// <summary>
+        /// Back to the wheel with the run intact. The chambers are re-ordered on the way out
+        /// because this is the only path that spins the same wheel twice — without it the
+        /// player would already know where the bomb is on the spin they just paid to retry.
+        /// It happens while the bomb screen still covers the wheel, so the swap is unseen.
+        /// </summary>
+        private void Resume()
+        {
+            Ctx.ShuffleCurrentWheel();
+            Fsm.Change(new IdleState(Ctx, Fsm));
         }
 
         public void OnGiveUp()
