@@ -24,6 +24,7 @@ namespace Wof.Presentation
         [SerializeField] private GameOverView gameOverScreen;
         [SerializeField] private InventoryView inventoryView;
         [SerializeField] private AudioService audio;
+        [SerializeField] private ScreenShake shake;
 
         private GameContext _ctx;
         private GameStateMachine _fsm;
@@ -41,7 +42,41 @@ namespace Wof.Presentation
 
         private void Start() => _fsm.Change(new BootState(_ctx, _fsm));
 
-        private void Update() => _fsm.Tick(Time.deltaTime);
+        private void Update()
+        {
+            _fsm.Tick(Time.deltaTime);
+            ReadKeyboard();
+        }
+
+        /// <summary>
+        /// SPACE spins, ENTER confirms whatever screen is up. Both go through the same
+        /// state interfaces the buttons use, so the keyboard can never reach an action the
+        /// on-screen UI would not offer right now.
+        /// </summary>
+        private void ReadKeyboard()
+        {
+            // Android maps the hardware/gesture back button to Escape. It only ever closes
+            // the stash here — a back press that quietly quit the app mid-run would throw
+            // away everything the player had staked.
+            if (Input.GetKeyDown(KeyCode.Escape) && inventoryView.IsOpen)
+            {
+                Sfx(a => a.PlayClick());
+                inventoryView.Hide();
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+                PressIfAccepted<ISpinInput>(s => s.OnSpin());
+
+            if (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter)) return;
+
+            // Exactly one state is active, so at most one of these fires. The bomb screen is
+            // deliberately missing: reviving spends gold and giving up ends the run, and
+            // neither belongs on a key the player is already mashing to dismiss popups.
+            if (PressIfAccepted<ICollectInput>(s => s.OnCollect())) return;
+            if (PressIfAccepted<ICashOutInput>(s => s.OnConfirm())) return;
+            PressIfAccepted<IRestartInput>(s => s.OnRestart());
+        }
 
         private void OnDestroy() => Unsubscribe();
 
@@ -53,6 +88,7 @@ namespace Wof.Presentation
             e.WheelBuilt += wheelView.Render;
             e.ZoneChanged += OnZoneChanged;
             e.SpinStarted += OnSpinStarted;
+            e.SpinLandedOnIndex += wheelView.HighlightSlice;
             e.RewardWon += OnRewardWon;
             e.BombExploded += OnBombExploded;
             e.RewardsBanked += OnRewardsBanked;
@@ -69,6 +105,7 @@ namespace Wof.Presentation
             e.WheelBuilt -= wheelView.Render;
             e.ZoneChanged -= OnZoneChanged;
             e.SpinStarted -= OnSpinStarted;
+            e.SpinLandedOnIndex -= wheelView.HighlightSlice;
             e.RewardWon -= OnRewardWon;
             e.BombExploded -= OnBombExploded;
             e.RewardsBanked -= OnRewardsBanked;
@@ -111,9 +148,11 @@ namespace Wof.Presentation
 
         private void OnZoneChanged(int zone, ZoneType type)
         {
-            wheelView.SetTitle(TitleFor(type));
+            wheelView.SetZone(type);
             hudView.SetZone(zone, type);
             _canLeaveCurrentZone = ZoneRules.CanLeave(zone, tuning.safeInterval, tuning.superInterval);
+            wheelView.SetLeavePrompt(
+                ZoneRules.ZonesUntilLeave(zone, tuning.safeInterval, tuning.superInterval));
             wheelView.SetLeaveEnabled(false); // re-enabled once we settle into Idle
         }
 
@@ -121,6 +160,9 @@ namespace Wof.Presentation
         {
             bombScreen.Show(_ctx.Settings.reviveGoldCost, _ctx.Economy.ShieldCount);
             Sfx(a => a.PlayBomb());
+            // full trauma: losing the run is the single biggest event in the game, and the
+            // shake is what the player feels before they have read a word of the screen
+            if (shake != null) shake.AddTrauma(1f);
         }
 
         private void Sfx(System.Action<AudioService> play) { if (audio != null) play(audio); }
@@ -187,6 +229,19 @@ namespace Wof.Presentation
         }
 
         /// <summary>
+        /// Like <see cref="Press{T}"/>, but silent when the active state does not accept the
+        /// input. A button can only be clicked while it is interactable; a key cannot, so
+        /// without this SPACE would click-click-click its way through a spin.
+        /// </summary>
+        private bool PressIfAccepted<T>(System.Action<T> action) where T : class
+        {
+            if (!(_fsm.Current is T input)) return false;
+            Sfx(a => a.PlayClick());
+            action(input);
+            return true;
+        }
+
+        /// <summary>
         /// Same as <see cref="Press{T}"/> but hands the state's answer back to the View, for
         /// inputs the View must react to. False when no active state accepts the input.
         /// </summary>
@@ -201,12 +256,5 @@ namespace Wof.Presentation
         {
             if (_fsm.Current is T input) action(input);
         }
-
-        private static string TitleFor(ZoneType type) => type switch
-        {
-            ZoneType.Super => "GOLDEN SPIN",
-            ZoneType.Safe => "SILVER SPIN",
-            _ => "SPIN",
-        };
     }
 }
