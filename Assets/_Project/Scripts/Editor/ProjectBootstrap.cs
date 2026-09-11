@@ -333,7 +333,16 @@ namespace Wof.EditorTools
             PlayerSettings.companyName = "Berkay";
             PlayerSettings.productName = "Wheel of Fortune";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.berkay.wofdemo");
-            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            // Auto-rotate rather than lock to portrait. A locked app does not just refuse to
+            // turn — Unity keeps rendering portrait and lets the device rotate the image, so
+            // the UI ends up lying on its side and Screen.width/height never swap, which is
+            // exactly what WheelView reads to pick its landscape arrangement.
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.AutoRotation;
+            PlayerSettings.allowedAutorotateToPortrait = true;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+            PlayerSettings.allowedAutorotateToLandscapeRight = true;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false; // no upside-down phone
+            PlayerSettings.useAnimatedAutorotation = true;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel22;
         }
 
