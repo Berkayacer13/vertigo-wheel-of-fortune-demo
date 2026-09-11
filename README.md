@@ -25,6 +25,24 @@ or **super** (every 30th) zone.
 - **Bomb** wipes the run — *revive* with gold (or ad), or *restart* from zone 1.
 - **Sound**: SFX for spin, win, bomb, cash-out and UI clicks.
 
+## UX & game feel
+
+The risk decision the game is built on is only interesting if the player can see it, so
+every rule the wheel enforces is stated on screen rather than implied:
+
+- The **risk line** under the cylinder reads `A BOMB WIPES YOUR RUN`, or `NO BOMB — THIS
+  SPIN IS FREE` on a safe/super zone, and the zone title is tinted to match.
+- The locked **LEAVE** button counts down (`SAFE ZONE IN 3`) instead of just greying out —
+  the every-5th-zone rule is invisible to a first-time player otherwise.
+- **AT RISK** turns amber the moment the run has something to lose.
+
+Feedback is layered and brief: the cylinder **winds back** before it launches, the indicator
+is **knocked aside** by each chamber that passes (so you can read how fast it is still
+travelling), the chamber it lands on **pops**, and a bomb **shakes the screen** on decaying
+trauma. Reward and loss screens hold off for a beat so the landing is visible before they
+cover it, then **fade and spring in**; balances **count up** rather than snapping. Every
+button squashes on press.
+
 ## Architecture
 
 A strictly layered, SOLID design. The lower layers compile and unit-test with **no UI**.
