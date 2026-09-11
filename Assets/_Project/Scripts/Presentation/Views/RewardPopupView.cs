@@ -1,5 +1,4 @@
 using System;
-using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +16,9 @@ namespace Wof.Presentation
         [SerializeField] private Button collectButton;   // ui_button_collect
         [SerializeField] private Button leaveButton;      // ui_button_reward_leave (safe/super only)
         [SerializeField] private SpriteRegistry sprites;
+
+        /// <summary>How long the wheel stays uncovered after landing (seconds).</summary>
+        private const float LandingBeat = 0.32f;
 
         private Action _onCollect, _onLeave;
         private TMP_Text _collectLabel;
@@ -43,7 +45,9 @@ namespace Wof.Presentation
         /// turns Collect into "COLLECT &amp; CONTINUE" so the choice reads clearly.</param>
         public void Show(Reward reward, bool canLeave)
         {
-            if (root != null) root.SetActive(true);
+            // held back a beat so the player sees the chamber it actually landed on
+            // pop under the indicator before the card covers the wheel
+            ShowRoot(root, card, LandingBeat);
             if (iconValue != null)
             {
                 iconValue.sprite = sprites != null ? sprites.Resolve(reward.IconKey) : null;
@@ -70,22 +74,9 @@ namespace Wof.Presentation
                 }
             }
             if (_collectLabel != null) _collectLabel.text = canLeave ? "COLLECT & CONTINUE" : "COLLECT";
-
-            // centre Collect when alone; share the row with Leave on safe/super zones
-            if (collectButton != null)
-            {
-                var rt = (RectTransform)collectButton.transform;
-                rt.anchoredPosition = new Vector2(canLeave ? -205f : 0f, rt.anchoredPosition.y);
-            }
-
-            if (card != null)
-            {
-                card.localScale = Vector3.one;
-                card.DOPunchScale(Vector3.one * 0.2f, 0.4f, 6, 0.8f);
-            }
         }
 
-        public void Hide() { if (root != null) root.SetActive(false); }
+        public void Hide() => HideRoot(root);
 
 #if UNITY_EDITOR
         protected override void AutoWire()

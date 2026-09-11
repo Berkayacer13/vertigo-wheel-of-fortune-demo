@@ -16,6 +16,7 @@ namespace Wof.Presentation
     public sealed class InventoryView : UiView
     {
         [SerializeField] private GameObject root;
+        [SerializeField] private RectTransform panel;       // ui_image_inventory_panel (pops on open)
         [SerializeField] private RectTransform grid;        // ui_inventory_grid (GridLayoutGroup)
         [SerializeField] private RectTransform itemTemplate; // ui_item_template (inactive blueprint)
         [SerializeField] private TMP_Text emptyValue;       // ui_text_inventory_empty_value
@@ -97,13 +98,16 @@ namespace Wof.Presentation
         /// <summary>Distinct reward stacks currently shown.</summary>
         public int ItemCount => _stacks.Count;
 
+        /// <summary>True while the stash is on screen — lets the back key close it.</summary>
+        public bool IsOpen => root != null && root.activeSelf;
+
         public void Show()
         {
-            if (root != null) root.SetActive(true);
+            ShowRoot(root, panel);
             RefreshEmptyLabel();
         }
 
-        public void Hide() { if (root != null) root.SetActive(false); }
+        public void Hide() => HideRoot(root);
 
         private void RefreshEmptyLabel()
         {
@@ -113,6 +117,7 @@ namespace Wof.Presentation
 #if UNITY_EDITOR
         protected override void AutoWire()
         {
+            Bind(ref panel, "ui_image_inventory_panel");
             Bind(ref grid, "ui_inventory_grid");
             Bind(ref itemTemplate, "ui_item_template");
             Bind(ref emptyValue, "ui_text_inventory_empty_value");

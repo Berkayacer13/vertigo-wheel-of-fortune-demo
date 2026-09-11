@@ -24,7 +24,7 @@ namespace Wof.Presentation
 
         public void Show(IReadOnlyList<Reward> banked)
         {
-            if (root != null) root.SetActive(true);
+            ShowRoot(root);
             if (summaryValue == null) return;
 
             // currencies go straight to the balances; everything else is "items".
@@ -43,7 +43,7 @@ namespace Wof.Presentation
                 $"YOU WALKED AWAY!\n\n+{gold} Gold   +{cash} Cash\n{items} item(s) collected";
         }
 
-        public void Hide() { if (root != null) root.SetActive(false); }
+        public void Hide() => HideRoot(root);
 
 #if UNITY_EDITOR
         protected override void AutoWire()

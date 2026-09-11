@@ -18,6 +18,9 @@ namespace Wof.Presentation
         [SerializeField] private Button reviveGoldButton;   // ui_button_revive_gold
         [SerializeField] private Button reviveAdButton;     // ui_button_revive_ad
 
+        /// <summary>How long the wheel stays uncovered after the bomb lands (seconds).</summary>
+        private const float LossBeat = 0.5f;
+
         /// <summary>Cyan wash that marks the revive button as a shield spend, not an ad.</summary>
         private static readonly Color ShieldTint = new Color(0.45f, 0.85f, 1f);
 
@@ -65,7 +68,10 @@ namespace Wof.Presentation
         {
             bool hasShield = shieldCount > 0;
             _hasShield = hasShield;
-            if (root != null) root.SetActive(true);
+            // longer hold than the reward popup: the screen shake and the bomb chamber
+            // under the indicator are the whole point of losing a run, and a screen that
+            // slams up instantly hides both.
+            ShowRoot(root, null, LossBeat);
             if (reviveCostValue != null) reviveCostValue.text = reviveCost.ToString();
 
             if (_bombIcon == null)
@@ -74,14 +80,17 @@ namespace Wof.Presentation
             {
                 _bombIcon.DOKill();
                 _bombIcon.localScale = Vector3.one;
-                _bombIcon.DOPunchScale(Vector3.one * 0.2f, 0.45f, 8, 0.75f);
+                // every flourish waits out LossBeat too, or it plays while the screen is
+                // still transparent and the player never sees it
+                _bombIcon.DOPunchScale(Vector3.one * 0.2f, 0.45f, 8, 0.75f).SetDelay(LossBeat);
                 var image = _bombIcon.GetComponent<Image>();
                 if (image != null)
                 {
                     image.DOKill();
                     image.color = Color.white;
                     image.DOColor(new Color(1f, 0.18f, 0.12f), 0.08f)
-                        .SetLoops(4, LoopType.Yoyo);
+                        .SetLoops(4, LoopType.Yoyo)
+                        .SetDelay(LossBeat);
                 }
             }
 
@@ -103,7 +112,8 @@ namespace Wof.Presentation
                 {
                     reviveAdButton.transform.DOKill();
                     reviveAdButton.transform.localScale = Vector3.one;
-                    reviveAdButton.transform.DOPunchScale(Vector3.one * 0.12f, 0.55f, 7, 0.7f);
+                    reviveAdButton.transform.DOPunchScale(Vector3.one * 0.12f, 0.55f, 7, 0.7f)
+                        .SetDelay(LossBeat);
                 }
             }
         }
@@ -111,7 +121,7 @@ namespace Wof.Presentation
         public void Hide()
         {
             KillFeedbackTweens();
-            if (root != null) root.SetActive(false);
+            HideRoot(root);
         }
 
         private void OnDestroy() => KillFeedbackTweens();

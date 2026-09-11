@@ -20,8 +20,8 @@ namespace Wof.Presentation
         private void OnDisable() { if (restartButton != null) restartButton.onClick.RemoveListener(HandleRestart); }
         private void HandleRestart() => _onRestart?.Invoke();
 
-        public void Show() { if (root != null) root.SetActive(true); }
-        public void Hide() { if (root != null) root.SetActive(false); }
+        public void Show() => ShowRoot(root);
+        public void Hide() => HideRoot(root);
 
 #if UNITY_EDITOR
         protected override void AutoWire()
