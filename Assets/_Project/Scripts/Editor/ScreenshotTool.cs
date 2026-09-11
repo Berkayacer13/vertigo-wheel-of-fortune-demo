@@ -150,6 +150,18 @@ namespace Wof.EditorTools
             gameViewType.GetProperty("selectedSizeIndex",
                     BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                 .SetValue(window, found);
+
+            // Maximise, and turn the zoom back to 1. A Game view docked smaller than the
+            // requested resolution renders the canvas at the WINDOW size while the capture
+            // still writes a full-resolution png, so the UI comes out laid out for a screen
+            // that was never asked for. That makes the shots depend on however the editor
+            // windows happened to be arranged, which is not something a CLI capture should
+            // inherit.
+            window.maximized = true;
+            var zoom = gameViewType.GetProperty("defaultScale",
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            if (zoom != null && zoom.CanWrite) zoom.SetValue(window, 1f);
+
             window.Repaint();
         }
     }
