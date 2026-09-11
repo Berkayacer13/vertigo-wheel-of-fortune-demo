@@ -361,15 +361,15 @@ namespace Wof.EditorTools
 
             BuildCamera();
             BuildEventSystem();
-            var safeArea = BuildCanvas();
+            var uiRoot = BuildCanvas();
 
-            var hud = BuildHud(safeArea);
-            var wheel = BuildWheel(safeArea, settings, registry);
-            var popup = BuildRewardPopup(safeArea, registry);
-            var bomb = BuildBombScreen(safeArea);
-            var cashout = BuildCashOutScreen(safeArea);
-            var gameover = BuildGameOverScreen(safeArea);
-            var inventory = BuildInventory(safeArea, registry); // last sibling -> draws on top
+            var hud = BuildHud(uiRoot);
+            var wheel = BuildWheel(uiRoot, settings, registry);
+            var popup = BuildRewardPopup(uiRoot, registry);
+            var bomb = BuildBombScreen(uiRoot);
+            var cashout = BuildCashOutScreen(uiRoot);
+            var gameover = BuildGameOverScreen(uiRoot);
+            var inventory = BuildInventory(uiRoot, registry); // last sibling -> draws on top
 
             var audioService = BuildAudioService();
 
@@ -385,6 +385,7 @@ namespace Wof.EditorTools
             so.FindProperty("gameOverScreen").objectReferenceValue = gameover;
             so.FindProperty("inventoryView").objectReferenceValue = inventory;
             so.FindProperty("audio").objectReferenceValue = audioService;
+            so.FindProperty("shake").objectReferenceValue = uiRoot.GetComponent<ScreenShake>();
             so.ApplyModifiedPropertiesWithoutUndo();
 
             // overlays start hidden; Show()/Hide() toggle them at runtime
@@ -449,7 +450,14 @@ namespace Wof.EditorTools
             var safe = NewRect("safe_area", canvasGo.transform);
             Stretch(safe);
             safe.gameObject.AddComponent<SafeArea>();
-            return safe;
+
+            // Everything else hangs off a shake root INSIDE the safe area. ScreenShake
+            // writes anchoredPosition every frame it is active and SafeArea owns the
+            // anchors/offsets of its own rect, so the two must never share a transform.
+            var shake = NewRect("ui_shake_root", safe);
+            Stretch(shake);
+            shake.gameObject.AddComponent<ScreenShake>();
+            return shake;
         }
 
         // ---- screen builders -------------------------------------------------
@@ -508,13 +516,15 @@ namespace Wof.EditorTools
         private static ZoneTrackView BuildZoneTrack(RectTransform hud)
         {
             const int cellCount = 7;
-            const float cellSize = 62f;
-            const float pitch = 72f;
+            // Placeholder geometry only: ZoneTrackView re-spaces the whole row at runtime
+            // from the width actually on screen. These values just keep the scene view sane.
+            const float cellSize = 104f;
+            const float pitch = 124f;
 
             var track = NewRect("ui_zone_track", hud);
-            // own row, centred, dropped well clear of the currency + inventory row above
+            // own row, centred, dropped clear of the currency + inventory row above
             Place(track, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f),
-                new Vector2(0f, -178f), new Vector2(pitch * cellCount + 24f, 78f));
+                new Vector2(0f, -196f), new Vector2(pitch * cellCount, cellSize + 22f));
 
             // solid dark rounded bar (the *_frame sprite is hollow -> reads as two boxes)
             var bg = AddImage("ui_image_zone_track_bg", track, LoadIcon("ui_card_panel_zone_bg"), Color.white, false);
@@ -529,18 +539,26 @@ namespace Wof.EditorTools
                 Place(cell, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                     new Vector2(startX + i * pitch, 0f), new Vector2(cellSize, cellSize));
 
+                // flat rounded chip, tinted per zone type; Simple rather than Sliced because
+                // the sprite carries no 9-slice border and its corner radius scales fine
+                var plate = AddImage("ui_image_zone_cell_plate", cell,
+                    LoadIcon("ui_card_panel_zone_coming"), Color.white, false);
+                Place(plate.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(cellSize, cellSize));
+                plate.enabled = false;   // only milestone zones wear one
+
+                // bevelled fill for the zone the player is standing on
                 var hl = AddImage("ui_image_zone_cell_highlight", cell,
                     LoadIcon("ui_card_panel_zone_current_white"), new Color(0.30f, 0.85f, 0.30f), false);
-                hl.type = Image.Type.Sliced;
                 Place(hl.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(cellSize, cellSize));
                 hl.enabled = false; // only the active cell turns this on
 
-                var label = AddText("ui_text_zone_cell_value", cell, "", 34, TextAlignmentOptions.Center);
+                var label = AddText("ui_text_zone_cell_value", cell, "", cellSize * 0.44f, TextAlignmentOptions.Center);
                 Stretch(label.rectTransform);
                 label.fontStyle = FontStyles.Bold;
 
                 var cellView = cell.gameObject.AddComponent<ZoneCell>();
                 var cso = new SerializedObject(cellView);
+                cso.FindProperty("plate").objectReferenceValue = plate;
                 cso.FindProperty("highlight").objectReferenceValue = hl;
                 cso.FindProperty("label").objectReferenceValue = label;
                 cso.ApplyModifiedPropertiesWithoutUndo();
@@ -559,6 +577,9 @@ namespace Wof.EditorTools
             return view;
         }
 
+        /// <summary>Distance from the rotor centre to a chamber centre, measured off the art.</summary>
+        private const float ChamberRadius = 265f;
+
         private static WheelView BuildWheel(RectTransform parent, GameSettings settings, SpriteRegistry registry)
         {
             var wheelRoot = NewRect("ui_wheel", parent);
@@ -568,6 +589,12 @@ namespace Wof.EditorTools
             Place(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 625), new Vector2(800, 90));
             title.color = new Color(1f, 0.78f, 0.18f);
             title.fontStyle = FontStyles.Bold;
+
+            // the risk read-out: says outright whether this spin can kill the run.
+            // WheelView positions and colours it per zone.
+            var subtitle = AddText("ui_text_wheel_subtitle_value", wheelRoot, "", 32, TextAlignmentOptions.Center);
+            Place(subtitle.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -400), new Vector2(820, 60));
+            subtitle.fontStyle = FontStyles.Bold;
 
             var rotor = NewRect("ui_image_spin_rotor", wheelRoot);
             Place(rotor, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 60), new Vector2(900, 900));
@@ -590,20 +617,32 @@ namespace Wof.EditorTools
                 Place(slice, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
                 slice.localRotation = Quaternion.Euler(0, 0, -45f * i);
 
-                // chamber centres sit at 0.60 of the rotor radius (~270 on the 900px rotor,
-                // measured from the cylinder art), so the icon is centred there and the
-                // amount badge hugs its lower edge — both land inside the chamber hole.
+                // Measured off ui_spin_bronze_base rather than eyeballed: the chamber hole
+                // is 140 rotor units across (radius 70) with its centre 265 out from the rotor
+                // centre. A square icon only fits inside a round hole if its DIAGONAL does,
+                // so the box maxes out at 70/0.707 = 99 — the previous 120px box at an offset
+                // of 286 overhung the rim by 36 units, which is why the full-bleed weapon-skin
+                // art sat on the metal instead of in the chamber.
                 var icon = AddImage("ui_image_slice_icon_value", slice, null, Color.white, false);
-                Place(icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 270), new Vector2(145, 145));
+                Place(icon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, ChamberRadius), new Vector2(96, 96));
                 icon.preserveAspect = true;
 
-                var amount = AddText("ui_text_slice_amount_value", slice, "", 30, TextAlignmentOptions.Center);
-                Place(amount.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 205), new Vector2(150, 42));
+                // The amount no longer competes with the icon for the hole: it sits on a dark
+                // pill straddling the hole's inner edge, so it stays legible whether the pixel
+                // behind it is chamber black or cylinder bronze.
+                var amountBg = AddImage("ui_image_slice_amount_bg", slice, LoadIcon("ui_card_panel_zone_bg"), new Color(1f, 1f, 1f, 0.92f), false);
+                amountBg.type = Image.Type.Sliced;
+                Place(amountBg.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 200), new Vector2(96, 34));
+
+                var amount = AddText("ui_text_slice_amount_value", slice, "", 24, TextAlignmentOptions.Center);
+                Place(amount.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 200), new Vector2(96, 34));
+                amount.fontStyle = FontStyles.Bold;
 
                 var view = slice.gameObject.AddComponent<SliceView>();
                 var sso = new SerializedObject(view);
                 sso.FindProperty("iconValue").objectReferenceValue = icon;
                 sso.FindProperty("amountValue").objectReferenceValue = amount;
+                sso.FindProperty("amountBg").objectReferenceValue = amountBg;
                 sso.FindProperty("sprites").objectReferenceValue = registry;
                 sso.ApplyModifiedPropertiesWithoutUndo();
                 sliceViews[i] = view;
@@ -629,6 +668,7 @@ namespace Wof.EditorTools
             so.FindProperty("spinButton").objectReferenceValue = spinBtn;
             so.FindProperty("leaveButton").objectReferenceValue = leaveBtn;
             so.FindProperty("titleValue").objectReferenceValue = title;
+            so.FindProperty("subtitleValue").objectReferenceValue = subtitle;
             so.FindProperty("settings").objectReferenceValue = settings;
             var arr = so.FindProperty("slices");
             arr.arraySize = sliceViews.Length;
@@ -653,14 +693,25 @@ namespace Wof.EditorTools
             var amount = AddText("ui_text_reward_amount_value", card.rectTransform, "x1", 64, TextAlignmentOptions.Center);
             Place(amount.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -140), new Vector2(420, 100));
 
-            // collect sits centred alone, or shares the row with leave on safe/super zones;
-            // the view sets the X at runtime so both fit even on 4:3.
-            var collect = AddButton("ui_button_collect", overlay, "COLLECT", 40, LoadIcon("UI_button_orange_standard"));
-            Place((RectTransform)collect.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -560), new Vector2(380, 130));
+            // A layout row, not hand-computed offsets: LEAVE only exists on safe/super zones,
+            // and a HorizontalLayoutGroup re-centres COLLECT on its own when the row goes from
+            // two buttons to one. The old code nudged COLLECT to a magic x of -205 instead.
+            var buttonRow = NewRect("ui_reward_button_row", overlay);
+            Place(buttonRow, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -560), new Vector2(880, 140));
+            var row = buttonRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+            row.spacing = 30f;
+            row.childAlignment = TextAnchor.MiddleCenter;
+            row.childControlWidth = false;   // buttons keep the sizes set below
+            row.childControlHeight = false;
+            row.childForceExpandWidth = false;
+            row.childForceExpandHeight = false;
+
+            var collect = AddButton("ui_button_collect", buttonRow, "COLLECT", 40, LoadIcon("UI_button_orange_standard"));
+            ((RectTransform)collect.transform).sizeDelta = new Vector2(380, 130);
 
             // shown only on safe/super zones (toggled by the view) — bank the run + walk away
-            var leave = AddButton("ui_button_reward_leave", overlay, "LEAVE & COLLECT", 32, LoadIcon("UI_button_grey_standard"));
-            Place((RectTransform)leave.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(205, -560), new Vector2(380, 130));
+            var leave = AddButton("ui_button_reward_leave", buttonRow, "LEAVE & COLLECT", 32, LoadIcon("UI_button_grey_standard"));
+            ((RectTransform)leave.transform).sizeDelta = new Vector2(380, 130);
             leave.gameObject.SetActive(false);
 
             var view = overlay.gameObject.AddComponent<RewardPopupView>();
@@ -882,6 +933,9 @@ namespace Wof.EditorTools
             var colors = btn.colors;
             colors.disabledColor = new Color(0.32f, 0.32f, 0.32f, 0.55f);
             btn.colors = colors;
+
+            // squash-on-press for every button in the game, in one place
+            rt.gameObject.AddComponent<ButtonPunch>();
 
             var text = AddText("ui_text_button_label", rt, label, fontSize, TextAlignmentOptions.Center);
             Stretch(text.rectTransform);
