@@ -38,7 +38,7 @@ namespace Wof.Presentation
                 // player can see the next safe zone coming up the track instead of having to
                 // notice that one number out of seven is tinted green.
                 plate.enabled = milestone;
-                if (milestone) plate.color = Dim(accent, current ? 0.55f : 0.26f);
+                if (milestone) plate.color = UiPalette.Dim(accent, current ? 0.55f : 0.26f);
             }
 
             if (highlight != null)
@@ -55,9 +55,6 @@ namespace Wof.Presentation
             if (current && !_wasCurrent) Pop();
             _wasCurrent = current;
         }
-
-        /// <summary>Darken a colour without making it see-through (Color * float hits alpha too).</summary>
-        private static Color Dim(Color c, float k) => new Color(c.r * k, c.g * k, c.b * k, 1f);
 
         /// <summary>Geometry comes from the track, which sizes the whole row to the screen.</summary>
         public void SetGeometry(Vector2 position, float size, float fontSize)

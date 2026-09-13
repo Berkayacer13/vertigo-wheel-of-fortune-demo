@@ -48,7 +48,6 @@ namespace Wof.Presentation
         private const float KickAngle = -13f;
         private const float KickScale = 0.14f;
 
-        private static readonly Color TitleNormal = new Color(1f, 0.78f, 0.18f);
         private static readonly Color TitleSafe = new Color(0.72f, 0.86f, 0.95f);
         private static readonly Color TitleSuper = new Color(1f, 0.86f, 0.35f);
 
@@ -259,7 +258,7 @@ namespace Wof.Presentation
                 {
                     ZoneType.Super => TitleSuper,
                     ZoneType.Safe => TitleSafe,
-                    _ => TitleNormal,
+                    _ => UiPalette.Gold,
                 };
             }
 
@@ -267,7 +266,7 @@ namespace Wof.Presentation
             bool safe = type != ZoneType.Normal;
             subtitleValue.text = safe ? "NO BOMB — THIS SPIN IS FREE" : "A BOMB WIPES YOUR RUN";
             subtitleValue.color = safe
-                ? new Color(0.45f, 0.92f, 0.36f)
+                ? UiPalette.SafeGreen
                 : new Color(0.85f, 0.45f, 0.42f);
         }
 

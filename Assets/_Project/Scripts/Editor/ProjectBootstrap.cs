@@ -587,7 +587,7 @@ namespace Wof.EditorTools
 
             var title = AddText("ui_text_wheel_title_value", wheelRoot, "SPIN", 64, TextAlignmentOptions.Center);
             Place(title.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 625), new Vector2(800, 90));
-            title.color = new Color(1f, 0.78f, 0.18f);
+            title.color = UiPalette.Gold;
             title.fontStyle = FontStyles.Bold;
 
             // the risk read-out: says outright whether this spin can kill the run.
@@ -797,7 +797,7 @@ namespace Wof.EditorTools
 
             var title = AddText("ui_text_inventory_title", panel.rectTransform, "COLLECTED REWARDS", 48, TextAlignmentOptions.Center);
             Place(title.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -70), new Vector2(800, 80));
-            title.color = new Color(1f, 0.78f, 0.18f);
+            title.color = UiPalette.Gold;
             title.fontStyle = FontStyles.Bold;
 
             var grid = NewRect("ui_inventory_grid", panel.rectTransform);

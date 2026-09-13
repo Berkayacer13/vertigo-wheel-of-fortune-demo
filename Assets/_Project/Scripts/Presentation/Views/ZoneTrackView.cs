@@ -25,10 +25,6 @@ namespace Wof.Presentation
         private const float FontShare = 0.44f;
         private const float BarPadding = 22f;
 
-        private static readonly Color NormalColor = new Color(0.82f, 0.84f, 0.88f);
-        private static readonly Color SafeColor   = new Color(0.45f, 0.92f, 0.36f);
-        private static readonly Color SuperColor  = new Color(1f, 0.78f, 0.18f);
-
         private float _laidOutWidth;
 
         public void SetZone(int zone)
@@ -42,7 +38,7 @@ namespace Wof.Presentation
                 var type = ZoneRules.Resolve(n, safeInterval, superInterval);
                 Color accent = ColorFor(type);
                 // spent zones fade back so the row reads as progress, not just a number line
-                if (n < zone) accent = Dim(accent, 0.5f);
+                if (n < zone) accent = UiPalette.Dim(accent, 0.5f);
                 cells[i].Set(n, accent, type != ZoneType.Normal, n == zone);
             }
         }
@@ -74,13 +70,11 @@ namespace Wof.Presentation
                 cells[i].SetGeometry(new Vector2(startX + i * pitch, 0f), size, font);
         }
 
-        private static Color Dim(Color c, float k) => new Color(c.r * k, c.g * k, c.b * k, 1f);
-
-        private Color ColorFor(ZoneType type) => type switch
+        private static Color ColorFor(ZoneType type) => type switch
         {
-            ZoneType.Super => SuperColor,
-            ZoneType.Safe => SafeColor,
-            _ => NormalColor,
+            ZoneType.Super => UiPalette.Gold,
+            ZoneType.Safe => UiPalette.SafeGreen,
+            _ => UiPalette.ZoneNeutral,
         };
 
 #if UNITY_EDITOR
