@@ -36,5 +36,17 @@ namespace Wof.Tests
             Assert.AreEqual(ZoneType.Super, super.Type);
             Assert.IsTrue(super.CanLeave);
         }
+
+        [Test]
+        public void Types_neighbouring_zones_with_its_own_intervals()
+        {
+            // the zone track draws the zones around the current one; they must follow the
+            // same tuning the current zone was resolved with
+            var info = ZoneInfo.For(1, safe: 4, super: 7);
+            Assert.AreEqual(ZoneType.Safe, info.TypeAt(4));
+            Assert.AreEqual(ZoneType.Super, info.TypeAt(7));
+            Assert.AreEqual(ZoneType.Normal, info.TypeAt(5));
+            Assert.AreEqual(ZoneType.Safe, ZoneInfo.For(1).TypeAt(5), "defaults still resolve x5 as safe");
+        }
     }
 }

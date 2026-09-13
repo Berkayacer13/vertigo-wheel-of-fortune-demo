@@ -567,8 +567,6 @@ namespace Wof.EditorTools
 
             var view = track.gameObject.AddComponent<ZoneTrackView>();
             var so = new SerializedObject(view);
-            so.FindProperty("safeInterval").intValue = ZoneRules.DefaultSafeInterval;
-            so.FindProperty("superInterval").intValue = ZoneRules.DefaultSuperInterval;
             var arr = so.FindProperty("cells");
             arr.arraySize = cells.Length;
             for (int i = 0; i < cells.Length; i++)

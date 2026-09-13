@@ -1,6 +1,5 @@
 using System;
 using Wof.Application;
-using Wof.Domain;
 
 namespace Wof.Presentation
 {
@@ -20,16 +19,14 @@ namespace Wof.Presentation
             // repeat wins into one cell, so counting its cells froze the readout at 1 while
             // the player kept stacking rewards they could lose.
             _events.WalletChanged += _view.SetRunCount;
-            _events.ZoneChanged += OnZoneChanged;
+            _events.ZoneChanged += _view.SetZone;
         }
 
         public void Dispose()
         {
             _events.CurrencyChanged -= _view.SetCurrency;
             _events.WalletChanged -= _view.SetRunCount;
-            _events.ZoneChanged -= OnZoneChanged;
+            _events.ZoneChanged -= _view.SetZone;
         }
-
-        private void OnZoneChanged(ZoneInfo zone) => _view.SetZone(zone.Zone, zone.Type);
     }
 }

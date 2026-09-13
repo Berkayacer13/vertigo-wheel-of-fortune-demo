@@ -109,7 +109,7 @@ namespace Wof.Presentation
                 .SetLink(rect.gameObject);
         }
 
-        public void SetZone(int zone, ZoneType type)
+        public void SetZone(ZoneInfo zone)
         {
             if (zoneTrack != null) zoneTrack.SetZone(zone);
         }

@@ -8,12 +8,15 @@ namespace Wof.Presentation
     /// is highlighted and kept centred, safe (×5) and super (×30) zones wear a coloured chip,
     /// and zones already behind the player are dimmed. The window clamps so it never shows a
     /// zone below 1, so early zones read 1,2,3,… like the reference card game.
+    /// <para>
+    /// Neighbouring zones are typed through <see cref="ZoneInfo.TypeAt"/>, i.e. with the
+    /// intervals the current zone was resolved with. The track used to keep its own serialized
+    /// copy of them, so retuning the zone intervals would have left it colouring the wrong zones.
+    /// </para>
     /// </summary>
     public sealed class ZoneTrackView : UiView
     {
         [SerializeField] private ZoneCell[] cells;          // ui_zone_cell_*
-        [SerializeField] private int safeInterval = 5;
-        [SerializeField] private int superInterval = 30;
 
         // The row is sized off the screen rather than pinned to constants: it is the player's
         // only read on how far they have come, and at a fixed 528 units it was a caption on a
@@ -27,15 +30,16 @@ namespace Wof.Presentation
 
         private float _laidOutWidth;
 
-        public void SetZone(int zone)
+        public void SetZone(ZoneInfo current)
         {
             if (cells == null || cells.Length == 0) return;
 
+            int zone = current.Zone;
             int start = Mathf.Max(1, zone - cells.Length / 2);
             for (int i = 0; i < cells.Length; i++)
             {
                 int n = start + i;
-                var type = ZoneRules.Resolve(n, safeInterval, superInterval);
+                var type = current.TypeAt(n);
                 Color accent = ColorFor(type);
                 // spent zones fade back so the row reads as progress, not just a number line
                 if (n < zone) accent = UiPalette.Dim(accent, 0.5f);
