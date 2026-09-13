@@ -41,6 +41,14 @@ namespace Wof.Data
                 Debug.LogWarning($"[{name}] Normal wheel must have exactly 1 bomb (found {bombs}).", this);
             if (!wantsBomb && bombs != 0)
                 Debug.LogWarning($"[{name}] Safe/Super wheel must have 0 bombs (found {bombs}).", this);
+
+            foreach (var s in slices)
+            {
+                if (s == null || s.isBomb || s.reward == null) continue;
+                if (!RewardRules.CanAppearOn(s.reward.Kind, tier))
+                    Debug.LogWarning($"[{name}] '{s.reward.name}' cannot appear on the {tier} wheel " +
+                                     "(the shield is a silver-spin gift only).", this);
+            }
         }
 #endif
     }

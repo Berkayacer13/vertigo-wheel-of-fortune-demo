@@ -127,12 +127,14 @@ namespace Wof.EditorTools
             new RewardSpec("reward_gold", RewardKind.Gold, "Gold", "UI_icon_gold", 100, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_cash", RewardKind.Cash, "Cash", "UI_icon_cash", 5, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_grenade_m26", RewardKind.Consumable, "M26 Grenade", "ui_icon_render_cons_grenade_m26", 2, RarityTier.Tier1, WinVfx.Star),
-            new RewardSpec("reward_shield", RewardKind.Shield, "Shield", "UI_Icons_Armor_Points", 1, RarityTier.Tier1, WinVfx.Star),
+            new RewardSpec("reward_healthshot_regen", RewardKind.Consumable, "Regenerator", "ui_icon_render_cons_healthshot_2_regenerator", 1, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_points_pistol", RewardKind.Points, "Pistol Points", "UI_Icons_Pistol_Points", 80, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_chest_small", RewardKind.Chest, "Small Chest", "UI_icon_chest_small_noligt", 1, RarityTier.Tier1, WinVfx.Star),
             new RewardSpec("reward_skin_tier1_shotgun", RewardKind.WeaponSkin, "Shotgun Skin", "UI_Icon_Renders_tier1_shotgun", 1, RarityTier.Tier1, WinVfx.Star),
             // silver pool
             new RewardSpec("reward_chest_silver", RewardKind.Chest, "Silver Chest", "UI_icon_chest_silver_nolight", 1, RarityTier.Tier2, WinVfx.Star),
+            // the silver spin's special gift — the only reward that survives a bomb (RewardRules)
+            new RewardSpec("reward_shield", RewardKind.Shield, "Shield", "UI_Icons_Armor_Points", 1, RarityTier.Special, WinVfx.Star),
             new RewardSpec("reward_grenade_m67", RewardKind.Consumable, "M67 Grenade", "ui_icon_render_cons_grenade_m67", 3, RarityTier.Tier2, WinVfx.Star),
             new RewardSpec("reward_healthshot_neuro", RewardKind.Consumable, "Neurostim", "ui_icon_render_cons_healthshot_2_neurostim", 2, RarityTier.Tier2, WinVfx.Star),
             new RewardSpec("reward_points_rifle", RewardKind.Points, "Rifle Points", "UI_Icons_Rifle_Points", 150, RarityTier.Tier2, WinVfx.Star),
@@ -193,7 +195,7 @@ namespace Wof.EditorTools
                 (null, 1f, true), // BOMB
                 ("reward_grenade_m26", 1.5f, false),
                 ("reward_points_pistol", 1.5f, false),
-                ("reward_shield", 0.8f, false),   // the bomb lives on this wheel, so the shield is earnable here
+                ("reward_healthshot_regen", 0.8f, false),   // the shield's old slot; same weight keeps the bomb odds unchanged
                 ("reward_chest_small", 1f, false),
                 ("reward_skin_tier1_shotgun", 0.5f, false),
             };
@@ -204,7 +206,7 @@ namespace Wof.EditorTools
                 ("reward_chest_silver", 1f, false),
                 ("reward_grenade_m67", 1.5f, false),
                 ("reward_points_rifle", 1.5f, false),
-                ("reward_shield", 0.6f, false),
+                ("reward_shield", 0.6f, false),     // special gift: silver spins only
                 ("reward_chest_standart", 1f, false),
                 ("reward_skin_tier2_rifle", 0.5f, false),
             };
@@ -254,6 +256,9 @@ namespace Wof.EditorTools
                     throw new System.InvalidOperationException(
                         $"[{file}] slice {i} references '{entries[i].reward}', which is not in RewardSpecs. " +
                         "Add it to RewardSpecs or point the slice at an existing reward.");
+                if (def != null && !RewardRules.CanAppearOn(def.Kind, tier))
+                    throw new System.InvalidOperationException(
+                        $"[{file}] slice {i} puts '{entries[i].reward}' on the {tier} wheel, which RewardRules forbids.");
                 el.FindPropertyRelative("reward").objectReferenceValue = def;
                 el.FindPropertyRelative("weight").floatValue = entries[i].weight;
                 el.FindPropertyRelative("isBomb").boolValue = entries[i].bomb;

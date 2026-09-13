@@ -21,8 +21,6 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: d4f1db23280b24f82b6e9e35b733e67b, type: 3}
   - key: ui_icon_render_cons_healthshot_2_regenerator
     sprite: {fileID: 21300000, guid: dec9ff922420148b692e58c77917b6f6, type: 3}
-  - key: UI_Icons_Armor_Points
-    sprite: {fileID: 21300000, guid: d0ea9438cdf3b4b1da0a84cd73840c89, type: 3}
   - key: UI_Icons_Pistol_Points
     sprite: {fileID: 21300000, guid: dd319509d15de405ea09d0ff93982dee, type: 3}
   - key: UI_icon_chest_small_noligt
@@ -31,6 +29,8 @@ MonoBehaviour:
     sprite: {fileID: 21300000, guid: 56bbf7894e50945069ebfaf99c88b65b, type: 3}
   - key: UI_icon_chest_silver_nolight
     sprite: {fileID: 21300000, guid: 868e361ab91444d32a1dd506d19434bc, type: 3}
+  - key: UI_Icons_Armor_Points
+    sprite: {fileID: 21300000, guid: d0ea9438cdf3b4b1da0a84cd73840c89, type: 3}
   - key: ui_icon_render_cons_grenade_m67
     sprite: {fileID: 21300000, guid: 0eec904f4e72e41a48beb7f41a697a1b, type: 3}
   - key: ui_icon_render_cons_healthshot_2_neurostim
