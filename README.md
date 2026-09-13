@@ -22,7 +22,9 @@ or **super** (every 30th) zone.
 - **Spin** the revolver wheel — win a reward (stacks + grows each zone) or hit the **bomb**.
 - **Safe / super zones** are risk-free (silver / golden spin, no bomb). After a safe-zone
   win you may **cash out from the reward popup** instead of pushing back into risk.
-- **Bomb** wipes the run — *revive* with gold (or ad), or *restart* from zone 1.
+- **Bomb** wipes the run — *revive* with gold, an ad or a held **shield**, or *restart* from zone 1.
+- **Shield** is the silver spin's special gift: it only appears on safe-zone (silver) wheels
+  and survives one bomb later in the run.
 - **Sound**: SFX for spin, win, bomb, cash-out and UI clicks.
 
 ## UX & game feel
@@ -132,14 +134,15 @@ Aspect screenshots (20:9 / 16:9 / 4:3): **Wof ▸ Capture Aspect Screenshots**
 Built commit-by-commit, bottom-up (Domain → Data → Application → Presentation).
 See the git log for the feature-by-feature progression.
 
-- Domain rules + edit-mode unit tests (29) — done
-- Data ScriptableObjects + generated instances (21 rewards, 3 wheels, tuning,
+- Domain rules + EditMode tests (81, including checks on the shipped wheel assets) — done
+- Data ScriptableObjects + generated instances (22 rewards, 3 wheels, tuning,
   settings, sprite registry) — done
 - Application: event bus, services, `GameContext`, full state machine — done
 - Presentation: all views, per-area presenters + `GameController` composition root — done
 - `Game.unity` scene with the brief's naming/raycast/sliced-sprite rules — done
 - Sprite Atlas, TMP, DOTween — done
-- PlayMode smoke tests (boot → spin → resolve → next zone) — done
+- PlayMode tests (9): boot → spin → resolve → next zone, every button clickable, and the
+  brief's Image rules (no stretched sprites, no stray Raycast Target / Maskable) — done
 - Top zone progress counter + reward-popup cash-out on safe/super zones — done
 - Audio: `SoundBank` ScriptableObject + `AudioService` (event-bus driven), spin/win/
   bomb/cash-out/click SFX — done
