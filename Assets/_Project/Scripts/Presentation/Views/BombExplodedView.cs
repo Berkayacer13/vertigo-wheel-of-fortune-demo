@@ -29,6 +29,12 @@ namespace Wof.Presentation
         private TMP_Text _recoveryLabel;
         private RectTransform _bombIcon;
 
+        /// <summary>The revive button's visible body. Its root belongs to layout, not animation.</summary>
+        private Transform ReviveAdBody =>
+            reviveAdButton != null && reviveAdButton.targetGraphic != null
+                ? reviveAdButton.targetGraphic.transform
+                : null;
+
         public void BindInput(Action onReviveGold, Action onReviveFree, Action onGiveUp)
         {
             _onReviveGold = onReviveGold;
@@ -94,15 +100,17 @@ namespace Wof.Presentation
             // for ad revives all run and silently spending a shield they earned.
             if (reviveAdButton != null)
             {
-                var buttonImage = reviveAdButton.GetComponent<Image>();
-                if (buttonImage != null)
-                    buttonImage.color = hasShield ? ShieldTint : Color.white;
+                // tint the body the Button draws with; the root carries no graphic
+                if (reviveAdButton.targetGraphic != null)
+                    reviveAdButton.targetGraphic.color = hasShield ? ShieldTint : Color.white;
 
-                if (hasShield)
+                var body = ReviveAdBody;
+                if (hasShield && body != null)
                 {
-                    reviveAdButton.transform.DOKill();
-                    reviveAdButton.transform.localScale = Vector3.one;
-                    reviveAdButton.transform.DOPunchScale(Vector3.one * 0.12f, 0.55f, 7, 0.7f)
+                    // punch the body, never the button's root (brief: no UI animation on roots)
+                    body.DOKill();
+                    body.localScale = Vector3.one;
+                    body.DOPunchScale(Vector3.one * 0.12f, 0.55f, 7, 0.7f)
                         .SetDelay(LossBeat);
                 }
             }
@@ -135,10 +143,11 @@ namespace Wof.Presentation
                 }
             }
 
-            if (reviveAdButton != null)
+            var body = ReviveAdBody;
+            if (body != null)
             {
-                reviveAdButton.transform.DOKill();
-                reviveAdButton.transform.localScale = Vector3.one;
+                body.DOKill();
+                body.localScale = Vector3.one;
             }
         }
 

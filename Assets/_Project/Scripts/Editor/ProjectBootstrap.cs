@@ -64,6 +64,8 @@ namespace Wof.EditorTools
             { "ui_card_frame_4px_zone", new Vector4(8, 8, 8, 8) },
             { "ui_card_frame_gardient", new Vector4(20, 20, 20, 20) },
             { "ui_card_panel_zone_bg", new Vector4(24, 24, 24, 24) },
+            { "ui_card_panel_zone_coming", new Vector4(10, 10, 10, 10) },
+            { "ui_card_panel_zone_current_white", new Vector4(8, 8, 8, 8) },
             { "ui_card_panel_zone_super", new Vector4(24, 24, 24, 24) },
             { "ui_card_zone_map_frame", new Vector4(24, 24, 24, 24) },
         };
@@ -503,7 +505,7 @@ namespace Wof.EditorTools
             var invRect = (RectTransform)invBtn.transform;
             invRect.pivot = new Vector2(1, 0.5f);
             Place(invRect, new Vector2(1, 0.5f), new Vector2(1, 0.5f), new Vector2(-215, 0), new Vector2(86, 86));
-            var invIcon = AddImage("ui_image_inventory_icon", invRect, LoadIcon("UI_icon_chest_small_noligt"), Color.white, false);
+            var invIcon = AddImage("ui_image_inventory_icon", (RectTransform)invBtn.targetGraphic.transform, LoadIcon("UI_icon_chest_small_noligt"), Color.white, false);
             Place(invIcon.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(62, 62));
             invIcon.preserveAspect = true;
 
@@ -544,25 +546,33 @@ namespace Wof.EditorTools
                 Place(cell, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
                     new Vector2(startX + i * pitch, 0f), new Vector2(cellSize, cellSize));
 
-                // flat rounded chip, tinted per zone type; Simple rather than Sliced because
-                // the sprite carries no 9-slice border and its corner radius scales fine
-                var plate = AddImage("ui_image_zone_cell_plate", cell,
+                // Everything visible sits on a body child. The track writes the cell's own
+                // position and size on every relayout while the active-zone pop scales, and the
+                // brief keeps UI animation off root transforms so the two never fight.
+                var body = NewRect("ui_zone_cell_body", cell);
+                Stretch(body);
+
+                // flat rounded chip, tinted per zone type; sliced so its corners never stretch
+                var plate = AddImage("ui_image_zone_cell_plate", body,
                     LoadIcon("ui_card_panel_zone_coming"), Color.white, false);
-                Place(plate.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(cellSize, cellSize));
+                plate.type = Image.Type.Sliced;
+                Stretch(plate.rectTransform);
                 plate.enabled = false;   // only milestone zones wear one
 
                 // bevelled fill for the zone the player is standing on
-                var hl = AddImage("ui_image_zone_cell_highlight", cell,
+                var hl = AddImage("ui_image_zone_cell_highlight", body,
                     LoadIcon("ui_card_panel_zone_current_white"), new Color(0.30f, 0.85f, 0.30f), false);
-                Place(hl.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(cellSize, cellSize));
+                hl.type = Image.Type.Sliced;
+                Stretch(hl.rectTransform);
                 hl.enabled = false; // only the active cell turns this on
 
-                var label = AddText("ui_text_zone_cell_value", cell, "", cellSize * 0.44f, TextAlignmentOptions.Center);
+                var label = AddText("ui_text_zone_cell_value", body, "", cellSize * 0.44f, TextAlignmentOptions.Center);
                 Stretch(label.rectTransform);
                 label.fontStyle = FontStyles.Bold;
 
                 var cellView = cell.gameObject.AddComponent<ZoneCell>();
                 var cso = new SerializedObject(cellView);
+                cso.FindProperty("body").objectReferenceValue = body;
                 cso.FindProperty("plate").objectReferenceValue = plate;
                 cso.FindProperty("highlight").objectReferenceValue = hl;
                 cso.FindProperty("label").objectReferenceValue = label;
@@ -752,9 +762,9 @@ namespace Wof.EditorTools
             var reviveGold = AddButton("ui_button_revive_gold", overlay, "REVIVE", 32, LoadIcon("UI_button_orange_standard"));
             Place((RectTransform)reviveGold.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -460), new Vector2(300, 125));
             // gold cost line inside the revive button
-            var costLabel = (RectTransform)reviveGold.transform.Find("ui_text_button_label");
+            var costLabel = (RectTransform)reviveGold.targetGraphic.transform.Find("ui_text_button_label");
             costLabel.anchoredPosition = new Vector2(0, 20);
-            var cost = AddText("ui_text_revive_cost_value", (RectTransform)reviveGold.transform, "25", 26, TextAlignmentOptions.Center);
+            var cost = AddText("ui_text_revive_cost_value", (RectTransform)reviveGold.targetGraphic.transform, "25", 26, TextAlignmentOptions.Center);
             Place(cost.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, -26), new Vector2(200, 40));
 
             var reviveAd = AddButton("ui_button_revive_ad", overlay, "REVIVE (AD)", 28, LoadIcon("UI_button_orange_standard"));
@@ -925,13 +935,16 @@ namespace Wof.EditorTools
             float fontSize, Sprite sprite)
         {
             var rt = NewRect(name, parent);
-            var img = rt.gameObject.AddComponent<Image>();
-            img.sprite = sprite;
-            img.type = Image.Type.Sliced;  // brief: use Sliced sprites
-            img.raycastTarget = true;      // buttons must receive clicks
-            img.maskable = false;
             var btn = rt.gameObject.AddComponent<Button>();
-            btn.targetGraphic = img;
+
+            // The visuals live on a body child, never on the button's own transform: layout
+            // (a layout group, or WheelView's relayout) owns the root, press feedback scales
+            // the body, and the brief keeps UI animation off root transforms so the two never
+            // fight. A click on the body bubbles up to the Button on the root.
+            var body = AddImage("ui_image_button_body", rt, sprite, Color.white, raycast: true);
+            body.type = Image.Type.Sliced;  // brief: use Sliced sprites
+            Stretch(body.rectTransform);
+            btn.targetGraphic = body;
             // make the disabled state unmistakable (e.g. LEAVE is locked until zone 5/30)
             var colors = btn.colors;
             colors.disabledColor = new Color(0.32f, 0.32f, 0.32f, 0.55f);
@@ -940,7 +953,7 @@ namespace Wof.EditorTools
             // squash-on-press for every button in the game, in one place
             rt.gameObject.AddComponent<ButtonPunch>();
 
-            var text = AddText("ui_text_button_label", rt, label, fontSize, TextAlignmentOptions.Center);
+            var text = AddText("ui_text_button_label", body.rectTransform, label, fontSize, TextAlignmentOptions.Center);
             Stretch(text.rectTransform);
             text.fontStyle = FontStyles.Bold;
             return btn;

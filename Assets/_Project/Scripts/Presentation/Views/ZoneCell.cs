@@ -10,12 +10,18 @@ namespace Wof.Presentation
     /// is a milestone (safe/super) zone, and lifts out of the row when it is the active one.
     /// All of its geometry is handed down by <see cref="ZoneTrackView"/> so the row can size
     /// itself to the screen.
+    /// <para>
+    /// The lift and the pop scale the body child, never the cell's own transform: the track
+    /// writes that one's position and size on every relayout, and the brief keeps UI
+    /// animation off root transforms.
+    /// </para>
     /// </summary>
     public sealed class ZoneCell : UiView
     {
-        [SerializeField] private Image plate;       // ui_image_zone_cell_plate (milestone chip)
-        [SerializeField] private Image highlight;   // ui_image_zone_cell_highlight
-        [SerializeField] private TMP_Text label;    // ui_text_zone_cell_value
+        [SerializeField] private RectTransform body; // ui_zone_cell_body (everything visible; what animates)
+        [SerializeField] private Image plate;        // ui_image_zone_cell_plate (milestone chip)
+        [SerializeField] private Image highlight;    // ui_image_zone_cell_highlight
+        [SerializeField] private TMP_Text label;     // ui_text_zone_cell_value
 
         /// <summary>The active chip stands proud of the row rather than just changing colour.</summary>
         private const float CurrentScale = 1.14f;
@@ -51,42 +57,46 @@ namespace Wof.Presentation
                 if (current) highlight.color = accent;
             }
 
-            transform.localScale = Vector3.one * (current ? CurrentScale : 1f);
+            if (body != null) body.localScale = Vector3.one * (current ? CurrentScale : 1f);
             if (current && !_wasCurrent) Pop();
             _wasCurrent = current;
         }
 
-        /// <summary>Geometry comes from the track, which sizes the whole row to the screen.</summary>
+        /// <summary>
+        /// Geometry comes from the track, which sizes the whole row to the screen. The body,
+        /// plate and highlight stretch to the cell, so only the cell and the type size are set.
+        /// </summary>
         public void SetGeometry(Vector2 position, float size, float fontSize)
         {
             var rect = (RectTransform)transform;
             rect.anchoredPosition = position;
             rect.sizeDelta = new Vector2(size, size);
 
-            if (plate != null) plate.rectTransform.sizeDelta = new Vector2(size, size);
-            if (highlight != null) highlight.rectTransform.sizeDelta = new Vector2(size, size);
             if (label != null) label.fontSize = fontSize;
         }
 
         /// <summary>Advancing a zone is progress — the chip that takes over says so.</summary>
         private void Pop()
         {
-            transform.DOKill();
-            transform.localScale = Vector3.one * CurrentScale;
-            transform.DOPunchScale(Vector3.one * 0.22f, 0.4f, 8, 0.9f)
+            if (body == null) return;
+            body.DOKill();
+            body.localScale = Vector3.one * CurrentScale;
+            body.DOPunchScale(Vector3.one * 0.22f, 0.4f, 8, 0.9f)
                 .SetUpdate(true)
                 .SetLink(gameObject);
         }
 
         private void OnDisable()
         {
-            transform.DOKill();
-            transform.localScale = Vector3.one * (_wasCurrent ? CurrentScale : 1f);
+            if (body == null) return;
+            body.DOKill();
+            body.localScale = Vector3.one * (_wasCurrent ? CurrentScale : 1f);
         }
 
 #if UNITY_EDITOR
         protected override void AutoWire()
         {
+            Bind(ref body, "ui_zone_cell_body");
             Bind(ref plate, "ui_image_zone_cell_plate");
             Bind(ref highlight, "ui_image_zone_cell_highlight");
             Bind(ref label, "ui_text_zone_cell_value");
