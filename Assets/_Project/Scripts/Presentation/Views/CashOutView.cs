@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Wof.Domain;
+using Wof.Application;
 
 namespace Wof.Presentation
 {
@@ -22,25 +21,17 @@ namespace Wof.Presentation
         private void OnDisable() { if (confirmButton != null) confirmButton.onClick.RemoveListener(HandleConfirm); }
         private void HandleConfirm() => _onConfirm?.Invoke();
 
-        public void Show(IReadOnlyList<Reward> banked)
+        /// <summary>
+        /// Print the receipt as-is. The totals come from the banking itself, so this screen
+        /// cannot promise loot the player does not actually keep.
+        /// </summary>
+        public void Show(BankReceipt receipt)
         {
             ShowRoot(root);
             if (summaryValue == null) return;
 
-            // currencies go straight to the balances; everything else is "items".
-            // Shields are run-scoped and bombs are never banked, so neither is counted —
-            // this must mirror EconomyService.Bank or the summary promises loot the
-            // player does not actually keep.
-            uint gold = 0, cash = 0;
-            int items = 0;
-            foreach (var r in banked)
-            {
-                if (r.Kind == RewardKind.Gold) gold += r.Amount;
-                else if (r.Kind == RewardKind.Cash) cash += r.Amount;
-                else if (r.Kind != RewardKind.Bomb && r.Kind != RewardKind.Shield) items++;
-            }
             summaryValue.text =
-                $"YOU WALKED AWAY!\n\n+{gold} Gold   +{cash} Cash\n{items} item(s) collected";
+                $"YOU WALKED AWAY!\n\n+{receipt.Gold} Gold   +{receipt.Cash} Cash\n{receipt.Items} item(s) collected";
         }
 
         public void Hide() => HideRoot(root);

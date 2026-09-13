@@ -54,9 +54,9 @@ namespace Wof.Application
 
         /// <summary>
         /// (R10) Cash out: bank currency rewards into permanent balances, move item rewards
-        /// into the permanent inventory, and return the full banked list for the cash-out screen.
+        /// into the permanent inventory, and return a receipt of exactly what was paid.
         /// </summary>
-        public IReadOnlyList<Reward> Bank()
+        public BankReceipt Bank()
         {
             // Total everything up BEFORE emptying the wallet. The old order cashed the
             // wallet out first and credited inside the loop, so an overflow part-way
@@ -73,18 +73,20 @@ namespace Wof.Application
             uint newCash = checked(Cash + cashGain);
 
             var banked = _wallet.CashOut();
+            int items = 0;
             foreach (var r in banked)
             {
                 if (r.Kind == RewardKind.Gold || r.Kind == RewardKind.Cash) continue;
                 if (r.Kind == RewardKind.Bomb || r.Kind == RewardKind.Shield) continue;
                 PermanentInventory.Add(r);
+                items++;
             }
 
             Gold = newGold;
             Cash = newCash;
             _events.RaiseCurrencyChanged(Gold, Cash);
             _events.RaiseWalletChanged(0);
-            return banked;
+            return new BankReceipt(goldGain, cashGain, items, banked);
         }
 
         /// <summary>(R9) Spend gold on a revive; returns false if the player can't afford it.</summary>

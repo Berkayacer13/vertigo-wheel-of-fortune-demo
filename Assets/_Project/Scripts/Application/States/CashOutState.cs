@@ -4,7 +4,7 @@ namespace Wof.Application
 {
     /// <summary>
     /// Player walked away on a safe/super zone (R10). Banks the run rewards, broadcasts
-    /// the collected list for the cash-out screen, and ends the run on confirm.
+    /// what was paid for the cash-out screen, and ends the run on confirm.
     /// </summary>
     public sealed class CashOutState : GameState, ICashOutInput
     {
@@ -13,8 +13,7 @@ namespace Wof.Application
         public override void Enter()
         {
             Ctx.Events.RaisePhaseChanged(GamePhase.CashOut);
-            var banked = Ctx.Economy.Bank();
-            Ctx.Events.RaiseRewardsBanked(banked);
+            Ctx.Events.RaiseRewardsBanked(Ctx.Economy.Bank());
         }
 
         public void OnConfirm() => Fsm.Change(new GameOverState(Ctx, Fsm));

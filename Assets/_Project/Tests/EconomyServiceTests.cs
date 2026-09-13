@@ -47,7 +47,7 @@ namespace Wof.Tests
 
             Assert.AreEqual(350, eco.Gold);
             Assert.AreEqual(20, eco.Cash);
-            Assert.AreEqual(3, banked.Count, "full list returned for the cash-out screen");
+            Assert.AreEqual(3, banked.Rewards.Count, "full list returned for the cash-out screen");
             Assert.IsFalse(eco.Wallet.HasRewards);
         }
 
@@ -214,6 +214,27 @@ namespace Wof.Tests
             Assert.AreEqual(1, raised, "one event for the whole cash-out, not one per reward");
             Assert.AreEqual(350u, seenGold);
             Assert.AreEqual(20u, seenCash);
+        }
+
+        [Test]
+        public void Bank_receipt_totals_exactly_what_was_paid()
+        {
+            // the cash-out screen prints this receipt as-is, so it has to count the same way
+            // Bank credits: shields are run-scoped and bombs are never banked
+            var eco = NewEconomy(gold: 100, cash: 5);
+            eco.AddRunReward(Gold(250));
+            eco.AddRunReward(Gold(50));
+            eco.AddRunReward(Cash(15));
+            eco.AddRunReward(Skin());
+            eco.AddRunReward(Chest(2));
+            eco.AddRunReward(Shield());
+            eco.AddRunReward(Bomb());
+
+            var receipt = eco.Bank();
+
+            Assert.AreEqual(300u, receipt.Gold, "the gain, not the new balance");
+            Assert.AreEqual(15u, receipt.Cash);
+            Assert.AreEqual(2, receipt.Items, "skin + chest; the shield and the bomb are not kept");
         }
 
     }

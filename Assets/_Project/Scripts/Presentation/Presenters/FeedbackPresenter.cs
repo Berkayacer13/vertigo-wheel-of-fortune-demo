@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Wof.Application;
 using Wof.Domain;
 
@@ -40,7 +39,7 @@ namespace Wof.Presentation
 
         private void OnRewardWon(Reward reward) { if (_audio != null) _audio.PlayWin(); }
 
-        private void OnRewardsBanked(IReadOnlyList<Reward> banked) { if (_audio != null) _audio.PlayCashOut(); }
+        private void OnRewardsBanked(BankReceipt receipt) { if (_audio != null) _audio.PlayCashOut(); }
 
         private void OnBombExploded(uint reviveGoldCost, int shieldCount)
         {

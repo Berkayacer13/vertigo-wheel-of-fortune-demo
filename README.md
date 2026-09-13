@@ -86,8 +86,8 @@ area's buttons into state inputs, so a UI change opens one small class instead o
 | `FeedbackPresenter` | SFX and screen shake |
 | `StateInput` / `KeyboardInput` | the one door from buttons and keys into the active state |
 
-Events carry what the screen needs (`ZoneInfo`, the revive offer), so no presenter reaches
-back into `ZoneRules`, the tuning asset or the economy.
+Events carry what the screen needs (`ZoneInfo`, the revive offer, the cash-out receipt), so
+no presenter or view reaches back into `ZoneRules`, the tuning asset or the economy.
 
 ## Project layout
 
