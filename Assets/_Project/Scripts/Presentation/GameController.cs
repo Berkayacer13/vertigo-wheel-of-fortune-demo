@@ -146,19 +146,18 @@ namespace Wof.Presentation
             hudView.SetRunCount(runCount);
         }
 
-        private void OnZoneChanged(int zone, ZoneType type)
+        private void OnZoneChanged(ZoneInfo zone)
         {
-            wheelView.SetZone(type);
-            hudView.SetZone(zone, type);
-            _canLeaveCurrentZone = ZoneRules.CanLeave(zone, tuning.safeInterval, tuning.superInterval);
-            wheelView.SetLeavePrompt(
-                ZoneRules.ZonesUntilLeave(zone, tuning.safeInterval, tuning.superInterval));
+            wheelView.SetZone(zone.Type);
+            hudView.SetZone(zone.Zone, zone.Type);
+            _canLeaveCurrentZone = zone.CanLeave;
+            wheelView.SetLeavePrompt(zone.ZonesUntilLeave);
             wheelView.SetLeaveEnabled(false); // re-enabled once we settle into Idle
         }
 
-        private void OnBombExploded()
+        private void OnBombExploded(uint reviveGoldCost, int shieldCount)
         {
-            bombScreen.Show(_ctx.Settings.reviveGoldCost, _ctx.Economy.ShieldCount);
+            bombScreen.Show(reviveGoldCost, shieldCount);
             Sfx(a => a.PlayBomb());
             // full trauma: losing the run is the single biggest event in the game, and the
             // shake is what the player feels before they have read a word of the screen

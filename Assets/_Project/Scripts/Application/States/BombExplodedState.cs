@@ -13,7 +13,9 @@ namespace Wof.Application
         public override void Enter()
         {
             Ctx.Events.RaisePhaseChanged(GamePhase.BombExploded);
-            Ctx.Events.RaiseBombExploded();
+            // the revive offer travels with the event, so the screen never reaches back into
+            // the economy or the settings asset to work out what to show
+            Ctx.Events.RaiseBombExploded(Ctx.Settings.reviveGoldCost, Ctx.Economy.ShieldCount);
         }
 
         public void OnReviveGold()

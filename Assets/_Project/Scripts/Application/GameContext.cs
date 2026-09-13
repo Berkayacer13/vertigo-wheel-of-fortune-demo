@@ -50,8 +50,7 @@ namespace Wof.Application
             // shuffle before announcing, so a zone's first spin is already randomised
             // and the View still renders the wheel exactly once per zone
             CurrentWheel = Builder.BuildForZone(zone).Shuffled(_shuffleRandom);
-            var type = ZoneRules.Resolve(zone, Tuning.safeInterval, Tuning.superInterval);
-            Events.RaiseZoneChanged(zone, type);
+            Events.RaiseZoneChanged(ZoneInfo.For(zone, Tuning.safeInterval, Tuning.superInterval));
             Events.RaiseWheelBuilt(CurrentWheel);
         }
 
