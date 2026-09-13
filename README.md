@@ -12,7 +12,7 @@ or **super** (every 30th) zone.
 ## Download & demo
 
 - 🎥 **Gameplay video** — [Google Drive](https://drive.google.com/file/d/1ZFh8yhtDx13A2jwNZ_Joq3uI_pIYskFa/view?usp=sharing)
-- 📦 **Android APK** — [Releases ▸ v1.0.0](https://github.com/Berkayacer13/vertigo-wheel-of-fortune-demo/releases/tag/v1.0.0)
+- 📦 **Android APK** — [Releases ▸ latest](https://github.com/Berkayacer13/vertigo-wheel-of-fortune-demo/releases/latest) · [direct download](https://github.com/Berkayacer13/vertigo-wheel-of-fortune-demo/releases/latest/download/wof-demo.apk)
 - 🖼️ **Screenshots** (20:9 / 16:9 / 4:3) — [docs/screenshots/](docs/screenshots/)
 
 ## Gameplay

@@ -25,6 +25,11 @@ namespace Wof.EditorTools
         private const string SettingsDir = "Assets/_Project/Settings";
         private const string ScenePath = "Assets/_Project/Scenes/Game.unity";
 
+        // Bump both for every release. The name is what players see and matches the release
+        // tag; Android refuses to update an installed app to a lower version code.
+        private const string AppVersion = "1.1.0";
+        private const int AndroidVersionCode = 2;
+
         // ---------------------------------------------------------------- Step 1
 
         [MenuItem("Wof/Bootstrap/1. Import TMP Essentials")]
@@ -340,6 +345,8 @@ namespace Wof.EditorTools
             PlayerSettings.companyName = "Berkay";
             PlayerSettings.productName = "Wheel of Fortune";
             PlayerSettings.SetApplicationIdentifier(BuildTargetGroup.Android, "com.berkay.wofdemo");
+            PlayerSettings.bundleVersion = AppVersion;
+            PlayerSettings.Android.bundleVersionCode = AndroidVersionCode;
             // Auto-rotate rather than lock to portrait. A locked app does not just refuse to
             // turn — Unity keeps rendering portrait and lets the device rotate the image, so
             // the UI ends up lying on its side and Screen.width/height never swap, which is
@@ -964,6 +971,10 @@ namespace Wof.EditorTools
         [MenuItem("Wof/Bootstrap/4. Build APK")]
         public static void BuildApk()
         {
+            // stamp the version (and the rest of the player settings) on every build, so an
+            // APK can never carry a version that disagrees with the release it ships in
+            ConfigurePlayerSettings();
+
             // IL2CPP + ARM64: modern Android devices (Pixel 7+, etc.) no longer run ARMv7-only APKs.
             PlayerSettings.SetScriptingBackend(BuildTargetGroup.Android, ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
