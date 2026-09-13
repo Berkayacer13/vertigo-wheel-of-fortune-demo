@@ -109,5 +109,26 @@ namespace Wof.Tests
                 if (a[i] != b[i]) return false;
             return true;
         }
+
+        [Test]
+        public void Scaled_wheel_carries_the_amount_that_will_be_paid()
+        {
+            var wheel = NewWheel();
+            var scaled = wheel.Scaled(new RewardScaler(_ => 2f), zone: 7);
+
+            Assert.AreEqual(wheel.Tier, scaled.Tier);
+            for (int i = 0; i < wheel.SliceCount; i++)
+            {
+                var before = wheel.SliceAt(i);
+                var after = scaled.SliceAt(i);
+                Assert.AreEqual(before.Reward.Id, after.Reward.Id, "order must not change");
+                Assert.AreEqual(before.Weight, after.Weight, "odds must not change");
+
+                // bombs and shields keep their amount; everything else grows with the zone
+                bool fixedAmount = before.IsBomb || before.Reward.Kind == RewardKind.Shield;
+                uint expected = fixedAmount ? before.Reward.Amount : before.Reward.Amount * 2u;
+                Assert.AreEqual(expected, after.Reward.Amount, before.Reward.Id);
+            }
+        }
     }
 }

@@ -47,9 +47,12 @@ namespace Wof.Application
         public void SetZone(int zone)
         {
             Zone = zone;
-            // shuffle before announcing, so a zone's first spin is already randomised
-            // and the View still renders the wheel exactly once per zone
-            CurrentWheel = Builder.BuildForZone(zone).Shuffled(_shuffleRandom);
+            // Scale for the zone before anything sees the wheel, so the amount under each
+            // chamber is the amount a landing pays. It used to be scaled only on landing,
+            // which made the chamber and the popup disagree from zone 2 onwards.
+            // Shuffle before announcing too, so a zone's first spin is already randomised
+            // and the View still renders the wheel exactly once per zone.
+            CurrentWheel = Builder.BuildForZone(zone).Scaled(Scaler, zone).Shuffled(_shuffleRandom);
             Events.RaiseZoneChanged(ZoneInfo.For(zone, Tuning.safeInterval, Tuning.superInterval));
             Events.RaiseWheelBuilt(CurrentWheel);
         }

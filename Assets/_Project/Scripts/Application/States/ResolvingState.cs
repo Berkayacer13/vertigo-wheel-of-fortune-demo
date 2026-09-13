@@ -4,7 +4,7 @@ namespace Wof.Application
 {
     /// <summary>
     /// Reads the landed slice and forks: bomb -> BombExploded (wallet kept for a possible
-    /// revive), otherwise scale + bank the reward and show the popup.
+    /// revive), otherwise bank the reward the chamber showed and open the popup.
     /// </summary>
     public sealed class ResolvingState : GameState
     {
@@ -30,9 +30,12 @@ namespace Wof.Application
             }
             else
             {
-                var scaled = Ctx.Scaler.Scale(slice.Reward, Ctx.Zone);
-                Ctx.Economy.AddRunReward(scaled);
-                Ctx.Events.RaiseRewardWon(scaled);
+                // pay the chamber exactly as it was shown: the wheel was scaled for this zone
+                // when it was built, and scaling again here is what made the popup disagree
+                // with the amount under the chamber
+                var reward = slice.Reward;
+                Ctx.Economy.AddRunReward(reward);
+                Ctx.Events.RaiseRewardWon(reward);
                 Fsm.Change(new RewardState(Ctx, Fsm));
             }
         }

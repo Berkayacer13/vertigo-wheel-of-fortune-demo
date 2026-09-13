@@ -38,6 +38,19 @@ namespace Wof.Domain
             return new WheelModel(Tier, shuffled);
         }
 
+        /// <summary>
+        /// The same wheel with every reward already scaled for <paramref name="zone"/>. Scaling
+        /// happens here, once, when the wheel is built, so the amount printed under a chamber is
+        /// the amount the player is paid. Resolving a landing must never scale a second time.
+        /// </summary>
+        public WheelModel Scaled(RewardScaler scaler, int zone)
+        {
+            var scaled = new List<WheelSlice>(SliceCount);
+            foreach (var slice in Slices)
+                scaled.Add(new WheelSlice(scaler.Scale(slice.Reward, zone), slice.Weight));
+            return new WheelModel(Tier, scaled);
+        }
+
         /// <summary>Per-slice weights, ready to hand to an <see cref="ISliceSelector"/>.</summary>
         public IReadOnlyList<float> Weights()
         {
