@@ -1,13 +1,16 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Wof.Application;
 using Wof.Data;
-using Wof.Domain;
 
 namespace Wof.Presentation
 {
     /// <summary>
-    /// The only MonoBehaviour that owns the game logic. Wires logic -> UI (event bus) and
-    /// UI -> logic (input interfaces forwarded to the active state), and drives the FSM.
+    /// Composition root. Holds the scene references, builds the game context and the state
+    /// machine, and hands each area of the screen to the presenter that owns it. It contains
+    /// no game rules and no view logic: event -> view wiring lives in the presenters, and every
+    /// player input goes through <see cref="StateInput"/>.
     /// </summary>
     public sealed class GameController : MonoBehaviour
     {
@@ -28,7 +31,8 @@ namespace Wof.Presentation
 
         private GameContext _ctx;
         private GameStateMachine _fsm;
-        private bool _canLeaveCurrentZone;
+        private KeyboardInput _keyboard;
+        private readonly List<IDisposable> _presenters = new List<IDisposable>();
 
         private void Awake()
         {
@@ -36,8 +40,17 @@ namespace Wof.Presentation
             _fsm = new GameStateMachine();
             _ctx.SpinAnimator = index => wheelView.SpinTo(index, _ctx.CurrentWheel.SliceCount);
 
-            Subscribe();
-            BindViewInputs();
+            var events = _ctx.Events;
+            var input = new StateInput(_fsm, PlayClick);
+
+            _presenters.Add(new WheelPresenter(events, input, wheelView));
+            _presenters.Add(new HudPresenter(events, hudView));
+            var inventory = new InventoryPresenter(events, input, hudView, inventoryView);
+            _presenters.Add(inventory);
+            _presenters.Add(new OverlayPresenter(events, input, rewardPopup, bombScreen, cashOutScreen, gameOverScreen));
+            _presenters.Add(new FeedbackPresenter(events, audio, shake));
+
+            _keyboard = new KeyboardInput(input, inventory);
         }
 
         private void Start() => _fsm.Change(new BootState(_ctx, _fsm));
@@ -45,215 +58,18 @@ namespace Wof.Presentation
         private void Update()
         {
             _fsm.Tick(Time.deltaTime);
-            ReadKeyboard();
+            _keyboard.Tick();
         }
 
-        /// <summary>
-        /// SPACE spins, ENTER confirms whatever screen is up. Both go through the same
-        /// state interfaces the buttons use, so the keyboard can never reach an action the
-        /// on-screen UI would not offer right now.
-        /// </summary>
-        private void ReadKeyboard()
+        private void OnDestroy()
         {
-            // Android maps the hardware/gesture back button to Escape. It only ever closes
-            // the stash here — a back press that quietly quit the app mid-run would throw
-            // away everything the player had staked.
-            if (Input.GetKeyDown(KeyCode.Escape) && inventoryView.IsOpen)
-            {
-                Sfx(a => a.PlayClick());
-                inventoryView.Hide();
-                return;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-                PressIfAccepted<ISpinInput>(s => s.OnSpin());
-
-            if (!Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter)) return;
-
-            // Exactly one state is active, so at most one of these fires. The bomb screen is
-            // deliberately missing: reviving spends gold and giving up ends the run, and
-            // neither belongs on a key the player is already mashing to dismiss popups.
-            if (PressIfAccepted<ICollectInput>(s => s.OnCollect())) return;
-            if (PressIfAccepted<ICashOutInput>(s => s.OnConfirm())) return;
-            PressIfAccepted<IRestartInput>(s => s.OnRestart());
+            foreach (var presenter in _presenters) presenter.Dispose();
+            _presenters.Clear();
         }
 
-        private void OnDestroy() => Unsubscribe();
-
-        // ---- logic -> UI ----------------------------------------------------
-
-        private void Subscribe()
+        private void PlayClick()
         {
-            var e = _ctx.Events;
-            e.WheelBuilt += wheelView.Render;
-            e.ZoneChanged += OnZoneChanged;
-            e.SpinStarted += OnSpinStarted;
-            e.SpinLandedOnIndex += wheelView.HighlightSlice;
-            e.RewardWon += OnRewardWon;
-            e.BombExploded += OnBombExploded;
-            e.RewardsBanked += OnRewardsBanked;
-            e.RewardConsumed += OnRewardConsumed;
-            e.CurrencyChanged += hudView.SetCurrency;
-            e.WalletChanged += OnWalletChanged;
-            e.PhaseChanged += OnPhaseChanged;
-        }
-
-        private void Unsubscribe()
-        {
-            if (_ctx == null) return;
-            var e = _ctx.Events;
-            e.WheelBuilt -= wheelView.Render;
-            e.ZoneChanged -= OnZoneChanged;
-            e.SpinStarted -= OnSpinStarted;
-            e.SpinLandedOnIndex -= wheelView.HighlightSlice;
-            e.RewardWon -= OnRewardWon;
-            e.BombExploded -= OnBombExploded;
-            e.RewardsBanked -= OnRewardsBanked;
-            e.RewardConsumed -= OnRewardConsumed;
-            e.CurrencyChanged -= hudView.SetCurrency;
-            e.WalletChanged -= OnWalletChanged;
-            e.PhaseChanged -= OnPhaseChanged;
-        }
-
-        private void OnSpinStarted() => Sfx(a => a.PlaySpin());
-
-        private void OnRewardWon(Reward reward)
-        {
-            // on a safe/super zone the popup also offers "leave & collect" so the player can
-            // bank the just-won silver/golden reward and walk away without re-entering risk
-            rewardPopup.Show(reward, _canLeaveCurrentZone);
-            inventoryView.AddItem(reward);
-            Sfx(a => a.PlayWin());
-        }
-
-        private void OnRewardConsumed(string rewardId)
-        {
-            inventoryView.RemoveItem(rewardId);
-        }
-
-        private void OnRewardsBanked(System.Collections.Generic.IReadOnlyList<Reward> banked)
-        {
-            cashOutScreen.Show(banked);
-            Sfx(a => a.PlayCashOut());
-        }
-
-        private void OnWalletChanged(int runCount)
-        {
-            if (runCount == 0) inventoryView.Clear(); // cash-out or bomb give-up
-            // drive the HUD from the wallet, not from the inventory grid: the grid merges
-            // repeat wins into one cell, so counting its cells froze the readout at 1
-            // while the player kept stacking rewards they could lose
-            hudView.SetRunCount(runCount);
-        }
-
-        private void OnZoneChanged(ZoneInfo zone)
-        {
-            wheelView.SetZone(zone.Type);
-            hudView.SetZone(zone.Zone, zone.Type);
-            _canLeaveCurrentZone = zone.CanLeave;
-            wheelView.SetLeavePrompt(zone.ZonesUntilLeave);
-            wheelView.SetLeaveEnabled(false); // re-enabled once we settle into Idle
-        }
-
-        private void OnBombExploded(uint reviveGoldCost, int shieldCount)
-        {
-            bombScreen.Show(reviveGoldCost, shieldCount);
-            Sfx(a => a.PlayBomb());
-            // full trauma: losing the run is the single biggest event in the game, and the
-            // shake is what the player feels before they have read a word of the screen
-            if (shake != null) shake.AddTrauma(1f);
-        }
-
-        private void Sfx(System.Action<AudioService> play) { if (audio != null) play(audio); }
-
-        private void OnPhaseChanged(GamePhase phase)
-        {
-            bool idle = phase == GamePhase.Idle;
-            wheelView.SetSpinEnabled(idle);
-            wheelView.SetLeaveEnabled(idle && _canLeaveCurrentZone);
-
-            switch (phase)
-            {
-                case GamePhase.Boot:
-                case GamePhase.ZoneIntro:
-                case GamePhase.Idle:
-                case GamePhase.Spinning:
-                case GamePhase.Resolving:
-                    HideOverlays();
-                    break;
-                case GamePhase.GameOver:
-                    HideOverlays();
-                    gameOverScreen.Show();
-                    break;
-                // Reward / BombExploded / CashOut overlays are shown by their data events.
-            }
-        }
-
-        private void HideOverlays()
-        {
-            rewardPopup.Hide();
-            bombScreen.Hide();
-            cashOutScreen.Hide();
-            gameOverScreen.Hide();
-            inventoryView.Hide();
-        }
-
-        // ---- UI -> logic (forwarded to whatever state accepts it) -----------
-
-        private void BindViewInputs()
-        {
-            wheelView.BindInput(onSpin: () => Press<ISpinInput>(s => s.OnSpin()),
-                                onLeave: () => Press<ISpinInput>(s => s.OnLeave()));
-            rewardPopup.BindCollect(() => Press<ICollectInput>(s => s.OnCollect()));
-            rewardPopup.BindLeave(() => Press<ICollectInput>(s => s.OnCollectAndLeave()));
-            bombScreen.BindInput(
-                onReviveGold: () => Press<IReviveInput>(s => s.OnReviveGold()),
-                onReviveAd: () => Press<IReviveInput>(s => s.OnReviveAd()),
-                onReviveShield: () => PressAndGet<IReviveInput>(s => s.OnReviveShield()),
-                onGiveUp: () => Press<IReviveInput>(s => s.OnGiveUp()));
-            cashOutScreen.BindConfirm(() => Press<ICashOutInput>(s => s.OnConfirm()));
-            gameOverScreen.BindRestart(() => Press<IRestartInput>(s => s.OnRestart()));
-
-            // inventory is a read-only viewer — pure presentation, no game rule involved,
-            // so it's wired view-to-view instead of through the state machine
-            hudView.BindInventory(() => { Sfx(a => a.PlayClick()); inventoryView.Show(); });
-            inventoryView.BindClose(() => { Sfx(a => a.PlayClick()); inventoryView.Hide(); });
-        }
-
-        /// <summary>Plays the click SFX, then routes the input to the active state.</summary>
-        private void Press<T>(System.Action<T> action) where T : class
-        {
-            Sfx(a => a.PlayClick());
-            Forward(action);
-        }
-
-        /// <summary>
-        /// Like <see cref="Press{T}"/>, but silent when the active state does not accept the
-        /// input. A button can only be clicked while it is interactable; a key cannot, so
-        /// without this SPACE would click-click-click its way through a spin.
-        /// </summary>
-        private bool PressIfAccepted<T>(System.Action<T> action) where T : class
-        {
-            if (!(_fsm.Current is T input)) return false;
-            Sfx(a => a.PlayClick());
-            action(input);
-            return true;
-        }
-
-        /// <summary>
-        /// Same as <see cref="Press{T}"/> but hands the state's answer back to the View, for
-        /// inputs the View must react to. False when no active state accepts the input.
-        /// </summary>
-        private bool PressAndGet<T>(System.Func<T, bool> action) where T : class
-        {
-            Sfx(a => a.PlayClick());
-            return _fsm.Current is T input && action(input);
-        }
-
-        /// <summary>Routes a player input to the active state only if it accepts that input.</summary>
-        private void Forward<T>(System.Action<T> action) where T : class
-        {
-            if (_fsm.Current is T input) action(input);
+            if (audio != null) audio.PlayClick();
         }
     }
 }

@@ -48,7 +48,7 @@ button squashes on press.
 A strictly layered, SOLID design. The lower layers compile and unit-test with **no UI**.
 
 ```
-Presentation (Views, MonoBehaviours, DOTween)   — renders state, raises input
+Presentation (Views, Presenters, DOTween)        — renders state, raises input
         ▲ events / method calls
 Application (Services, State machine, Events)    — pure C#, orchestration
         ▲
@@ -71,6 +71,24 @@ Domain from referencing UI — the architecture can't rot.
 
 The original brief lives in [docs/brief/](docs/brief/).
 
+### Presentation: presenters over a composition root
+
+`GameController` only builds things — the context, the state machine, and one presenter per
+area of the screen. Each presenter subscribes to the events its area needs and turns that
+area's buttons into state inputs, so a UI change opens one small class instead of one big one.
+
+| Class | Owns |
+|---|---|
+| `WheelPresenter` | wheel render, zone header, SPIN / LEAVE gating, landing mark |
+| `HudPresenter` | balances, AT RISK, zone track |
+| `InventoryPresenter` | the run stash: contents, open / close, back key |
+| `OverlayPresenter` | reward, bomb, cash-out and game-over screens |
+| `FeedbackPresenter` | SFX and screen shake |
+| `StateInput` / `KeyboardInput` | the one door from buttons and keys into the active state |
+
+Events carry what the screen needs (`ZoneInfo`, the revive offer), so no presenter reaches
+back into `ZoneRules`, the tuning asset or the economy.
+
 ## Project layout
 
 ```
@@ -80,7 +98,7 @@ Assets/_Project/
     Domain/       Wof.Domain — enums, ZoneRules, WheelModel, RewardWallet, ...
     Data/         Wof.Data — ScriptableObject configs
     Application/  Wof.Application — Events, Services, GameContext, States
-    Presentation/ Wof.Presentation — Views, GameController, helpers
+    Presentation/ Wof.Presentation — Views, Presenters, Input, GameController (composition root)
     Editor/       Wof.Editor — custom inspectors
   Tests/          Wof.Tests — edit-mode unit tests
   Prefabs/  Scenes/  Settings/
@@ -118,7 +136,7 @@ See the git log for the feature-by-feature progression.
 - Data ScriptableObjects + generated instances (21 rewards, 3 wheels, tuning,
   settings, sprite registry) — done
 - Application: event bus, services, `GameContext`, full state machine — done
-- Presentation: all views + `GameController` — done
+- Presentation: all views, per-area presenters + `GameController` composition root — done
 - `Game.unity` scene with the brief's naming/raycast/sliced-sprite rules — done
 - Sprite Atlas, TMP, DOTween — done
 - PlayMode smoke tests (boot → spin → resolve → next zone) — done

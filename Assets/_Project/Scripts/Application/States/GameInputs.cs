@@ -1,7 +1,7 @@
 namespace Wof.Application
 {
     // Player input is expressed as small interfaces implemented by the states that
-    // accept it. A thin GameController forwards a button click to
+    // accept it. StateInput (Presentation) forwards a button click or key press to
     // (fsm.Current as IXxxInput)?.OnYyy(), so Unity never decides game rules and an
     // input is simply ignored in any state that doesn't accept it.
 
