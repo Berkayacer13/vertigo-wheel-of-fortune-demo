@@ -30,8 +30,7 @@ namespace Wof.Presentation
             _rewardPopup.BindLeave(() => input.Press<ICollectInput>(s => s.OnCollectAndLeave()));
             _bombScreen.BindInput(
                 onReviveGold: () => input.Press<IReviveInput>(s => s.OnReviveGold()),
-                onReviveAd: () => input.Press<IReviveInput>(s => s.OnReviveAd()),
-                onReviveShield: () => input.PressAndGet<IReviveInput>(s => s.OnReviveShield()),
+                onReviveFree: () => input.Press<IReviveInput>(s => s.OnReviveFree()),
                 onGiveUp: () => input.Press<IReviveInput>(s => s.OnGiveUp()));
             _cashOutScreen.BindConfirm(() => input.Press<ICashOutInput>(s => s.OnConfirm()));
             _gameOverScreen.BindRestart(() => input.Press<IRestartInput>(s => s.OnRestart()));

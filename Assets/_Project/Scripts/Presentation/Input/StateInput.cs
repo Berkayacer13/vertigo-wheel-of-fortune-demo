@@ -42,15 +42,5 @@ namespace Wof.Presentation
             action(input);
             return true;
         }
-
-        /// <summary>
-        /// Same as <see cref="Press{T}"/> but hands the state's answer back, for inputs the
-        /// View must react to. False when no active state accepts the input.
-        /// </summary>
-        public bool PressAndGet<T>(Func<T, bool> action) where T : class
-        {
-            _click();
-            return _fsm.Current is T input && action(input);
-        }
     }
 }

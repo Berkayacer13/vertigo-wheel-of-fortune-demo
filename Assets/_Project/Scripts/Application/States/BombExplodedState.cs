@@ -3,7 +3,7 @@ using Wof.Domain;
 namespace Wof.Application
 {
     /// <summary>
-    /// Bomb hit. The wallet is NOT wiped yet, so a revive (gold R9, or ad) returns to
+    /// Bomb hit. The wallet is NOT wiped yet, so a revive (gold R9, a held shield, or ad) returns to
     /// Idle with rewards intact. Giving up wipes the run (R8) and ends the game.
     /// </summary>
     public sealed class BombExplodedState : GameState, IReviveInput
@@ -24,17 +24,16 @@ namespace Wof.Application
             Resume(); // rewards kept (R9)
         }
 
-        public void OnReviveAd() => Resume(); // ad reward assumed granted
-
         /// <summary>
-        /// Spend a shield instead of gold or an ad. Returns false to the View when the
-        /// wallet holds none, so the button can fall back rather than dying silently.
+        /// Revive without spending gold. A held shield is the better offer, so it is spent
+        /// first; with none left, the rewarded ad pays (assumed granted in this demo). This
+        /// used to be decided in the bomb screen's click handler, which left the view choosing
+        /// what the player paid with.
         /// </summary>
-        public bool OnReviveShield()
+        public void OnReviveFree()
         {
-            if (!Ctx.Economy.TryConsumeShield()) return false;
-            Resume(); // rewards kept, minus the shield
-            return true;
+            Ctx.Economy.TryConsumeShield(); // false, and a no-op, when the wallet holds none
+            Resume(); // rewards kept, minus the shield if one was spent
         }
 
         /// <summary>

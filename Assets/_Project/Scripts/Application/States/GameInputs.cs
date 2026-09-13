@@ -20,8 +20,7 @@ namespace Wof.Application
     public interface IReviveInput
     {
         void OnReviveGold();
-        void OnReviveAd();
-        bool OnReviveShield();   // false when no shield was available to spend
+        void OnReviveFree();     // spend a held shield if there is one, otherwise the rewarded ad
         void OnGiveUp();
     }
 

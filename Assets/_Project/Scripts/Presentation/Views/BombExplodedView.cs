@@ -8,7 +8,8 @@ namespace Wof.Presentation
 {
     /// <summary>
     /// Loss/revive screen: "a bomb exploded…". Three actions map to the brief screenshot:
-    /// GIVE UP / REVIVE (gold) / REVIVE (ad).
+    /// GIVE UP / REVIVE (gold) / REVIVE (ad) — the last one relabelled USE SHIELD while the
+    /// player holds one. Which of the two it spends is the state's decision, not this view's.
     /// </summary>
     public sealed class BombExplodedView : UiView
     {
@@ -24,50 +25,39 @@ namespace Wof.Presentation
         /// <summary>Cyan wash that marks the revive button as a shield spend, not an ad.</summary>
         private static readonly Color ShieldTint = new Color(0.45f, 0.85f, 1f);
 
-        private Action _onReviveGold, _onReviveAd, _onGiveUp;
-        private Func<bool> _onReviveShield;
+        private Action _onReviveGold, _onReviveFree, _onGiveUp;
         private TMP_Text _recoveryLabel;
         private RectTransform _bombIcon;
-        private bool _hasShield;
 
-        public void BindInput(Action onReviveGold, Action onReviveAd, Func<bool> onReviveShield, Action onGiveUp)
+        public void BindInput(Action onReviveGold, Action onReviveFree, Action onGiveUp)
         {
             _onReviveGold = onReviveGold;
-            _onReviveAd = onReviveAd;
-            _onReviveShield = onReviveShield;
+            _onReviveFree = onReviveFree;
             _onGiveUp = onGiveUp;
         }
 
         private void OnEnable()
         {
             if (reviveGoldButton != null) reviveGoldButton.onClick.AddListener(HandleReviveGold);
-            if (reviveAdButton != null) reviveAdButton.onClick.AddListener(HandleReviveAd);
+            if (reviveAdButton != null) reviveAdButton.onClick.AddListener(HandleReviveFree);
             if (giveUpButton != null) giveUpButton.onClick.AddListener(HandleGiveUp);
         }
 
         private void OnDisable()
         {
             if (reviveGoldButton != null) reviveGoldButton.onClick.RemoveListener(HandleReviveGold);
-            if (reviveAdButton != null) reviveAdButton.onClick.RemoveListener(HandleReviveAd);
+            if (reviveAdButton != null) reviveAdButton.onClick.RemoveListener(HandleReviveFree);
             if (giveUpButton != null) giveUpButton.onClick.RemoveListener(HandleGiveUp);
         }
 
         private void HandleReviveGold() => _onReviveGold?.Invoke();
-        private void HandleReviveAd()
-        {
-            // the shield is the better offer, so it takes this button when the player holds
-            // one — but if the wallet has none left, fall through to the ad rather than
-            // leaving a button that does nothing
-            if (_hasShield && _onReviveShield != null && _onReviveShield()) return;
-            _onReviveAd?.Invoke();
-        }
+        private void HandleReviveFree() => _onReviveFree?.Invoke();
         private void HandleGiveUp() => _onGiveUp?.Invoke();
 
         /// <param name="shieldCount">Shields in the run wallet; each one survives one bomb.</param>
         public void Show(uint reviveCost, int shieldCount)
         {
             bool hasShield = shieldCount > 0;
-            _hasShield = hasShield;
             // longer hold than the reward popup: the screen shake and the bomb chamber
             // under the indicator are the whole point of losing a run, and a screen that
             // slams up instantly hides both.
